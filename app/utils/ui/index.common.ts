@@ -153,9 +153,10 @@ export async function hideLoading() {
         loadingIndicator.hide();
     }
 }
-export async function tryCatch(callback, onErrorCb?, finallyCb?) {
+export async function tryCatch<T = any>(callback: (...args) => Promise<T>, onErrorCb?, finallyCb?) {
     try {
-        await callback();
+        const result = await callback();
+        return result;
     } catch (error) {
         showError(error);
         onErrorCb?.();
@@ -163,10 +164,11 @@ export async function tryCatch(callback, onErrorCb?, finallyCb?) {
         finallyCb?.();
     }
 }
-export function tryCatchFunction(callback, onErrorCb?, finallyCb?) {
+export function tryCatchFunction<T = any>(callback: (...args) => Promise<T>, onErrorCb?, finallyCb?) {
     return async (...args) => {
         try {
-            await callback(...args);
+            const result = await callback(...args);
+            return result;
         } catch (error) {
             showError(error);
             onErrorCb?.();
