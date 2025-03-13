@@ -38,6 +38,11 @@ on:
         default: 'false'
         required: false
         type: string
+      logging:
+        description: "Should we force logging enabled"
+        default: 'false'
+        required: true
+        type: string
 
 jobs:
   release:
@@ -183,12 +188,12 @@ jobs:
       - name: publish beta
         if: inputs.publish == 'true' || inputs.fakepublish == 'true'
         run: |
-          bundle exec fastlane android beta create_tag:${{ inputs.publish }} publish:${{ inputs.publish }} sentry:${{ inputs.sentry }} github:false
+          bundle exec fastlane android beta create_tag:${{ inputs.publish }} publish:${{ inputs.publish }} sentry:${{ inputs.sentry }} github:false logging:${{ inputs.logging }}
       
       - name: publish github
         if: inputs.github == 'true' || inputs.fakepublish == 'true'
         run: |
-          bundle exec fastlane android github create_tag:${{ inputs.publish }} publish:${{ inputs.github }} sentry:${{ inputs.sentry_fdroid }} github:${{ inputs.github }}
+          bundle exec fastlane android github create_tag:${{ inputs.publish }} publish:${{ inputs.github }} sentry:${{ inputs.sentry_fdroid }} github:${{ inputs.github }} logging:${{ inputs.logging }}
       
       - uses: actions/upload-artifact@v4
         if: inputs.github == 'true' || inputs.fakepublish == 'true'
