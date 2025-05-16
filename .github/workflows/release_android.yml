@@ -210,7 +210,7 @@ jobs:
           if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
       - uses: actions/upload-artifact@v4
-        if: inputs.publish == 'false' && inputs.fakepublish == 'true'
+        if: inputs.publish == 'false' && (inputs.fakepublish == 'true' && inputs.android_playstore == 'true')
         with:
           name: ${{ env.APP_ID }}.android.aab.${{ env.VERSION_STR }}
           path: |
