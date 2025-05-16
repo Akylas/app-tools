@@ -191,7 +191,7 @@ jobs:
           echo $KEYSTORE_BASE64 | base64 -d > $KEYSTORE_PATH
 
       - name: publish beta
-        if: inputs.publish == 'true' || (inputs.fakepublish == 'true' && (inputs.android_playstore == 'true')
+        if: inputs.publish == 'true' || (inputs.fakepublish == 'true' && inputs.android_playstore == 'true')
         run: |
           bundle exec fastlane android beta create_tag:${{ inputs.publish }} publish:${{ inputs.publish }} sentry:${{ inputs.sentry }} github:false logging:${{ inputs.logging }}
       
