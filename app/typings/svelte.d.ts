@@ -153,6 +153,7 @@ declare namespace svelteNative.JSX {
     interface SliderAttributes {
         stepSize?: number;
         trackBackgroundColor?: string | Color;
+        thumbColor?: string | Color;
     }
     interface ProgressAttributes {
         padding?: number | string;
