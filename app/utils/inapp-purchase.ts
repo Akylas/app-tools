@@ -12,7 +12,6 @@ export function init() {
         inappPurchase.on(PaymentEvent.EventName, (event: PaymentEvent.IEvent) => {
             switch (event.context) {
                 case PaymentEvent.Context.CONNECTING_STORE:
-                    console.log('Store Status: ' + event.result);
                     if (event.result === PaymentEvent.Result.SUCCESS) {
                         const canPay = inappPurchase.canMakePayments();
                         if (canPay) {

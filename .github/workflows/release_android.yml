@@ -23,6 +23,11 @@ on:
         default: 'true'
         required: false
         type: string
+      android_playstore:
+        description: "build aab with fake build?"
+        default: 'false'
+        required: false
+        type: string
       github:
         description: "Should we publish on Github?"
         default: 'true'
@@ -37,6 +42,11 @@ on:
         description: "Should we use sentry with fdroid build?"
         default: 'false'
         required: false
+        type: string
+      logging:
+        description: "Should we force logging enabled"
+        default: 'false'
+        required: true
         type: string
 
 jobs:
@@ -181,14 +191,14 @@ jobs:
           echo $KEYSTORE_BASE64 | base64 -d > $KEYSTORE_PATH
 
       - name: publish beta
-        if: inputs.publish == 'true' || inputs.fakepublish == 'true'
+        if: inputs.publish == 'true' || (inputs.fakepublish == 'true' && inputs.android_playstore == 'true')
         run: |
-          bundle exec fastlane android beta create_tag:${{ inputs.publish }} publish:${{ inputs.publish }} sentry:${{ inputs.sentry }} github:false
+          bundle exec fastlane android beta create_tag:${{ inputs.publish }} publish:${{ inputs.publish }} sentry:${{ inputs.sentry }} github:false logging:${{ inputs.logging }}
       
       - name: publish github
         if: inputs.github == 'true' || inputs.fakepublish == 'true'
         run: |
-          bundle exec fastlane android github create_tag:${{ inputs.publish }} publish:${{ inputs.github }} sentry:${{ inputs.sentry_fdroid }} github:${{ inputs.github }}
+          bundle exec fastlane android github create_tag:${{ inputs.publish }} publish:${{ inputs.github }} sentry:${{ inputs.sentry_fdroid }} github:${{ inputs.github }} logging:${{ inputs.logging }}
       
       - uses: actions/upload-artifact@v4
         if: inputs.github == 'true' || inputs.fakepublish == 'true'
@@ -200,7 +210,7 @@ jobs:
           if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
       - uses: actions/upload-artifact@v4
-        if: inputs.publish == 'false' && inputs.fakepublish == 'true'
+        if: inputs.publish == 'false' && (inputs.fakepublish == 'true' && inputs.android_playstore == 'true')
         with:
           name: ${{ env.APP_ID }}.android.aab.${{ env.VERSION_STR }}
           path: |
