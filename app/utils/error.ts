@@ -180,6 +180,7 @@ export interface HTTPErrorProps {
     statusCode: number;
     responseHeaders?: Headers;
     message: string;
+    title?: string;
     requestParams: HTTPSOptions;
 }
 export class HTTPError extends CustomError {
