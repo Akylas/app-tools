@@ -1,10 +1,8 @@
 {
-    "packageManager": "yarn@4.3.1",
+    "packageManager": "yarn@4.9.4+sha512.7b1cb0b62abba6a537b3a2ce00811a843bea02bcf53138581a6ae5b1bf563f734872bd47de49ce32a9ca9dcaff995aa789577ffb16811da7c603dcf69e73750b"
     "scripts": {
         "createBase64Key": "openssl base64 < $KEYSTORE_PATH | tr -d '\n' | tee base64.txt",
-        "postinstall": "./node_modules/.bin/patch-package",
         "prepare": "ts-patch install -s",
-        "patchpackage": "./node_modules/.bin/patch-package",
         "prepare.ios": "PLAY_STORE_BUILD=1 ns prepare ios --release --env.adhoc",
         "prepare.ios.sentry": "NS_SENTRY=1 PLAY_STORE_BUILD=1 ns prepare ios --release --env.adhoc_sentry",
         "run.ios.production": "NS_LOGGING=1 PLAY_STORE_BUILD=1 ns run ios --release --env.production --env.adhoc",
@@ -23,7 +21,7 @@
         "build.android.baselineprofile": "npm run prepare.android.benchmark ; ./$APP_BUILD_PATH/android/gradlew -p ./$APP_BUILD_PATH/android :benchmark:pixel2Api31BenchmarkAndroidTest -Pandroid.testoptions.manageddevices.emulator.gpu=\"swiftshader_indirect\" -Pandroid.testInstrumentationRunnerArguments.androidx.benchmark.enabledRules=BaselineProfile -Dorg.gradle.workers.max=4 --stacktrace; mv -f ./$APP_BUILD_PATH/android/benchmark/build/outputs/managed_device_android_test_additional_output/pixel2Api31/BaselineProfileGenerator_startup-baseline-prof.txt $APP_RESOURCES/Android/src/main/baseline-prof.txt",
         "svelte-check": "svelte-check --compiler-warnings 'a11y-no-onchange:ignore,a11y-label-has-associated-control:ignore,a11y-autofocus:ignore,illegal-attribute-character:ignore'",
         "postinstall": "npm run setup",
-        "setup": "npm run submodules && npm run patchpackage",
+        "setup": "npm run submodules",
         "submodules": "git submodule update --init",
         "sync": "node ./tools/sync.mjs",
         "update": "node ./tools/update.mjs",
