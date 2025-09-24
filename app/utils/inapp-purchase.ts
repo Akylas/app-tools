@@ -19,7 +19,7 @@ export function init() {
                             inappPurchase.fetchItems([itemPrefix + 'smalltip', itemPrefix + 'mediumtip', itemPrefix + 'largetip', itemPrefix + 'largertip', itemPrefix + 'bigtip']);
                         }
                     } else if (event.result === PaymentEvent.Result.FAILURE) {
-                        DEV_LOG && console.log('in_app_failure', (event as PaymentEvent.ConnectingStore.IFailure).payload.description);
+                        // DEV_LOG && console.log('in_app_failure', (event as PaymentEvent.ConnectingStore.IFailure).payload.description);
 
                         // showError(new Error(lc('in_app_failure', (event as PaymentEvent.ConnectingStore.IFailure).payload.description)));
                     }
@@ -28,7 +28,6 @@ export function init() {
                     if (event.result === PaymentEvent.Result.SUCCESS) {
                         // if you passed multiple items you will need to handle accordingly for your app
                         inappItems = (event as PaymentEvent.RetrievingItems.ISuccess).payload;
-                        DEV_LOG && console.log('inappItems', inappItems);
                     } else if (event.result === PaymentEvent.Result.FAILURE) {
                         DEV_LOG && console.log('in_app_failure', (event as PaymentEvent.RetrievingItems.IFailure).payload.description);
                         // showError(new Error(lc('in_app_failure', (event as PaymentEvent.RetrievingItems.IFailure).payload.description)));
@@ -36,7 +35,7 @@ export function init() {
                     break;
                 case PaymentEvent.Context.PROCESSING_ORDER:
                     if (event.result === PaymentEvent.Result.FAILURE) {
-                        DEV_LOG && console.log('in_app_failure', (event as PaymentEvent.ProcessingOrder.IFailure).payload.description);
+                        // DEV_LOG && console.log('in_app_failure', (event as PaymentEvent.ProcessingOrder.IFailure).payload.description);
                         // showError(new Error(lc('in_app_failure', (event as PaymentEvent.ProcessingOrder.IFailure).payload.description)));
                         // handle the failure of the purchase
                     } else if (event.result === PaymentEvent.Result.SUCCESS) {
