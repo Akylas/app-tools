@@ -35,7 +35,7 @@ export function createView<T extends View>(claz: new () => T, props: Partial<Pic
 
 export async function showSnack(options: SnackBarOptions) {
     try {
-        options.view = options.view || Application.getRootView();
+        // options.view = options.view || Application.getRootView();
         return mdShowSnack(options);
     } catch (error) {}
 }
