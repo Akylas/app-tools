@@ -29,6 +29,8 @@ export class CustomError extends BaseError {
 
     static fromObject(data) {
         switch (data.customErrorConstructorName) {
+            case 'IgnoreError':
+                return new IgnoreError();
             case 'TimeoutError':
                 return new TimeoutError(data);
             case 'NoNetworkError':
@@ -141,6 +143,11 @@ export class SilentError extends CustomError {
             },
             'SilentError'
         );
+    }
+}
+export class IgnoreError extends CustomError {
+    constructor() {
+        super({}, 'IgnoreError');
     }
 }
 
