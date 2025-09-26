@@ -31,7 +31,7 @@ on:
 
 jobs:
   release:
-    runs-on: macos-latest
+    runs-on: macos-15
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -40,9 +40,9 @@ jobs:
           filter: tree:0
           submodules: recursive
 
-      - uses: maxim-lobanov/setup-xcode@master
+      - uses: maxim-lobanov/setup-xcode@7f352e61cbe8130c957c3bc898c4fb025784ea1e
         with:
-          xcode-version: 16.1
+          xcode-version: 16.4
 
       - uses: oleksiyrudenko/gha-git-credentials@v2-latest
         with:
