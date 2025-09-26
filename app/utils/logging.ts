@@ -49,11 +49,12 @@ function actualLog(level: 'info' | 'log' | 'error' | 'warn' | 'debug', ...args) 
 }
 let installed = false;
 export function install() {
-    if (installed) {
+    if (installed || console['augmented'] === true) {
         return;
     }
     installed = true;
     if (SENTRY_ENABLED) {
+        console['augmented'] = true;
         console.log = (...args) => actualLog('log', ...args);
         console.info = (...args) => actualLog('info', ...args);
         console.error = (...args) => actualLog('error', ...args);

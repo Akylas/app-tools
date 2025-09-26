@@ -111,13 +111,19 @@ declare namespace svelteNative.JSX {
         onlinkTap?;
         'on:linkTap'?;
     }
-    interface WebViewAttributes {
+    interface WebViewAttributes {}
+    interface AWebViewAttributes extends WebViewAttributes {
         builtInZoomControls?: boolean;
         debugMode?: boolean;
         displayZoomControls?: boolean;
         nestedScrollView?: boolean;
         normalizeUrls?: boolean;
         webConsoleEnabled?: boolean;
+        mediaPlaybackRequiresUserAction?: boolean;
+        domStorage?: boolean;
+        userAgent?: string;
+        'on:shouldOverrideUrlLoading'?: (args) => void;
+        'on:loadFinished'?: (args) => void;
     }
     interface TextFieldAttributes {
         floating?: boolean | string;
@@ -158,12 +164,6 @@ declare namespace svelteNative.JSX {
     interface ProgressAttributes {
         padding?: number | string;
     }
-    interface WebViewAttributes {
-        domStorage?: boolean;
-        userAgent?: string;
-        'on:shouldOverrideUrlLoading'?: (args) => void;
-        'on:loadFinished'?: (args) => void;
-    }
     interface PageAttributes {
         'on:sharedElementTo'?: (args) => void;
         'on:sharedElementFrom'?: (args) => void;
@@ -182,6 +182,7 @@ declare namespace svelteNative.JSX {
         cspan: CSpanAttributes;
         canvaslabel: CanvasLabelAttributes;
         canvasview: CanvasAttributes;
+        awebview: AWebViewAttributes;
         linechart: LineChartAttributes;
     };
 
