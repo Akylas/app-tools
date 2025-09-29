@@ -23,7 +23,7 @@
         "svelte-check": "svelte-check --compiler-warnings 'a11y-no-onchange:ignore,a11y-label-has-associated-control:ignore,a11y-autofocus:ignore,illegal-attribute-character:ignore'",
         "postinstall": "npm run setup",
         "setup": "npm run submodules",
-        "submodules": "git submodule update --init",
+        "submodules": "git submodule update --init --recursive",
         "sync": "node ./tools/sync.mjs",
         "update": "node ./tools/update.mjs",
         "set_version":"node tools/scripts/set-version.mjs set-version"
