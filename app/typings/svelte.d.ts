@@ -144,6 +144,7 @@ declare namespace svelteNative.JSX {
         'on:blur'?: (args) => void;
     }
     interface TextBaseAttributes {
+        iosAccessibilityAdjustsFontSize?: boolean;
         verticalTextAlignment?: string;
         fontWeight?: string | number;
         text?: string | number;
