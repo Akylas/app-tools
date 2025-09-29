@@ -212,7 +212,7 @@ export function wrapNativeHttpException(error, requestParams: HttpsRequestOption
         if (
             /(cancelled)/.test(message) ||
             (__ANDROID__ && /(SocketTimeout|ConnectException|SocketException|SSLException|UnknownHost)/.test(message)) ||
-            (__IOS__ && /(request timed out|unable to complete your request|ConnectException|connection was lost)/.test(message))
+            (__IOS__ && /(request timed out|unable to complete your request|ConnectException|connection was lost|connection appears to be offline)/.test(message))
         ) {
             return new TimeoutError();
         } else {
