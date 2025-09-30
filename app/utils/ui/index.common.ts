@@ -150,7 +150,7 @@ export async function hideLoading() {
     }
     showLoadingStartTime = null;
     if (loadingIndicator) {
-        loadingIndicator.hide();
+        return loadingIndicator.hide();
     }
 }
 export async function tryCatch<T = any>(callback: (...args) => Promise<T>, onErrorCb?, finallyCb?) {
