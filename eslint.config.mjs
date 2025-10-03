@@ -237,6 +237,8 @@ export default [
         processor: 'svelte/svelte',
         rules: {
             'no-undef': 'off',
+            'svelte/require-each-key': 'off',
+            'svelte/no-reactive-reassign': 'off',
             'svelte/sort-attributes': 'warn',
             'svelte/no-inner-declarations': 'off',
             'svelte/valid-compile': [
