@@ -119,11 +119,14 @@ declare namespace svelteNative.JSX {
         nestedScrollView?: boolean;
         normalizeUrls?: boolean;
         webConsoleEnabled?: boolean;
+        webRTC?: boolean;
         mediaPlaybackRequiresUserAction?: boolean;
         domStorage?: boolean;
         userAgent?: string;
+        createWebViewClient?: Function;
         'on:shouldOverrideUrlLoading'?: (args) => void;
         'on:loadFinished'?: (args) => void;
+        [key: `on:${string}`]: (args: any) => void;
     }
     interface TextFieldAttributes {
         floating?: boolean | string;
