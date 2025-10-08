@@ -15,7 +15,6 @@ declare const __INAPP_PURCHASE_ID_PREFIX__: string;
 
 declare const TNS_ENV: string;
 declare const DEV_LOG: boolean;
-declare const TEST_LOG: boolean;
 declare const NO_CONSOLE: boolean;
 declare const PRODUCTION: boolean;
 declare const SENTRY_ENABLED: boolean;
