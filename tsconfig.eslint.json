@@ -1,4 +1,5 @@
 {
     "extends": "./tsconfig.json",
-    "include": ["../.*.js", "*.js", "*.mjs", "../*.mjs", "./scripts/*.js", "./scripts/*.mjs", "./app/**/*.svelte", "./app/**/*.ts", "../app/**/*.ts", "../app/**/*.svelte", "../typings/*.d.ts"]
+    "compilerOptions": {},
+    "include": ["../**/*", "../**/*.json", "../**/.*.js", "../**/.*.mjs"]
 }

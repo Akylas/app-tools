@@ -33,5 +33,6 @@
         }
     },
     "include": ["./app/components/**/*.svelte", "./app/**/*.ts", "./app/**/*.svelte", "../app/**/*.ts", "../app/**/*.svelte", "../typings/*.d.ts"],
-    "exclude": ["**/node_modules"]
+    "exclude": ["node_modules", "platforms", "hooks"],
+    "compileOnSave": false
 }

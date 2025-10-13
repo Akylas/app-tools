@@ -27,6 +27,9 @@ export function groupByArray<T>(items: T[], keyGetter: (item: T) => string[]) {
 export function setCustomCssRootClass(className, oldClassName?) {
     const rootView = Application.getRootView();
     const rootModalViews = rootView._getRootModalViews();
+    if (rootModalViews) {
+        return;
+    }
     // DEV_LOG && console.log('setCustomCssRootClass', rootView, className, oldClassName);
     function addCssClass(rootView, cssClass) {
         cssClass = `${CSSUtils.CLASS_PREFIX}${cssClass}`;
@@ -47,5 +50,19 @@ export function setCustomCssRootClass(className, oldClassName?) {
     addCssClass(rootView, className);
     if (oldClassName) {
         removeCssClass(rootView, oldClassName);
+    }
+}
+
+export function updateRootCss() {
+    let rootView = Application.getRootView();
+    if (rootView?.parent) {
+        rootView = rootView.parent as any;
+    }
+    if (rootView) {
+        rootView._onCssStateChange();
+        const rootModalViews = rootView._getRootModalViews();
+        if (rootModalViews) {
+            rootModalViews.forEach((rootModalView) => rootModalView._onCssStateChange());
+        }
     }
 }
