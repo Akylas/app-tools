@@ -43,6 +43,8 @@ declare namespace svelteNative.JSX {
         elevation?: string | number;
         'on:closingModally'?: (args: ShownModallyData) => void;
         'on:closedBottomSheet'?: (args) => void;
+        iosAccessibilityMaxFontScale?: number;
+        iosAccessibilityMinFontScale?: number;
         // "on:shownModally"?: (args: ShownModallyData) => void;
     }
 
