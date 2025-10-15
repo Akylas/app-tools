@@ -29,26 +29,32 @@ function convertArg(arg) {
     }
     return arg;
 }
+let inActualLog = false;
 function actualLog(level: 'info' | 'log' | 'error' | 'warn' | 'debug', ...args) {
-    if (SENTRY_ENABLED && Sentry) {
-        Sentry.addBreadcrumb({
-            category: 'console',
-            message: args.map(convertArg).join(' '),
-            level: level as any
-        });
+    if (!inActualLog) {
+        inActualLog = true;
+        if (SENTRY_ENABLED && Sentry) {
+            Sentry.addBreadcrumb({
+                category: 'console',
+                message: args.map(convertArg).join(' '),
+                level: level as any
+            });
+        }
     }
     // we do it this way allow terser to "drop" it
     if (NO_CONSOLE !== true) {
         originalConsole[level](...args);
     }
+    inActualLog = false;
 }
 let installed = false;
 export function install() {
-    if (installed) {
+    if (installed || console['augmented'] === true) {
         return;
     }
     installed = true;
-    if (NO_CONSOLE !== true && SENTRY_ENABLED) {
+    if (SENTRY_ENABLED) {
+        console['augmented'] = true;
         console.log = (...args) => actualLog('log', ...args);
         console.info = (...args) => actualLog('info', ...args);
         console.error = (...args) => actualLog('error', ...args);

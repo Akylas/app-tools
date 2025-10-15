@@ -1,5 +1,5 @@
 import { createHash } from 'crypto';
-import { copyFileSync, existsSync, lstatSync, mkdir, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'fs';
+import { copyFileSync, existsSync, lstatSync, mkdir, mkdirSync, readFileSync, readdirSync, unlinkSync, writeFileSync } from 'fs';
 import pkg from '@dotenvx/dotenvx';
 const { config, set: dotEnvSet } = pkg;
 import { exec, execSync } from 'child_process';
@@ -48,7 +48,6 @@ function compareFile(file1, file2) {
 }
 
 function handleCommonFile(file, directory) {
-    console.log('handleCommonFile', file, directory);
     const destFile = `./${directory.replace('_template', '')}${file}`;
     const inFile = `./tools/common/${directory}${file}`;
     if (lstatSync(inFile).isDirectory()) {
@@ -67,6 +66,15 @@ function handleCommonFile(file, directory) {
     }
 }
 
+function removeOldFiles(files) {
+    for (let i = 0; i < files.length; i++) {
+        if (existsSync(files[i])) {
+            unlinkSync(files[i]);
+        }
+    }
+}
+
+
 function updateDotEnv() {
     const processEnv = {};
     config({ processEnv });
@@ -81,9 +89,11 @@ function updateDotEnv() {
 }
 
 readdirSync('./tools/common').forEach((file) => handleCommonFile(file, ''));
+removeOldFiles(['./.prettierrc']);
 
 const commonPackageJSON = JSON.parse(readFileSync('./tools/package.json.template'));
 checkAndUpdate(commonPackageJSON['scripts'], 'scripts');
+checkAndUpdate(commonPackageJSON['packageManager'], 'packageManager');
 
 writeFileSync('./package.json', JSON.stringify(pluginPackageJSON, 0, 4) + '\n');
 

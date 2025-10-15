@@ -15,12 +15,12 @@ export async function startSentry() {
                 dsn: SENTRY_DSN,
                 appPrefix: '~/',
                 // appPrefix: SENTRY_PREFIX,
-                release: `${__APP_ID__}@${__APP_VERSION__}+${__APP_BUILD_NUMBER__}`,
+                release: `${__APP_ID__}@${__ANDROID__ ? 'android' : 'ios'}${__ANDROID__ ? (PLAY_STORE_BUILD ? '.playstore' : '.fdroid') : ''}@${__APP_VERSION__}+${__APP_BUILD_NUMBER__}`,
                 dist: `${__APP_BUILD_NUMBER__}.${__ANDROID__ ? 'android' : 'ios'}${__ANDROID__ ? (PLAY_STORE_BUILD ? '.playstore' : '.fdroid') : ''}`,
-                colnoOffset: 4,
+                // colnoOffset: 4,
                 disabledNativeIntegrations: ['io.sentry.UncaughtExceptionHandlerIntegration', 'io.sentry.android.fragment.FragmentLifecycleIntegration'], // Android
                 flushSendEvent: true,
-                enableCrashHandler: false, // iOS
+                enableCrashHandler: true, // iOS
                 attachScreenshot: false,
                 enableUIViewControllerTracing: false,
                 enableUserInteractionTracing: false,

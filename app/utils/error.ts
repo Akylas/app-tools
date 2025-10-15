@@ -29,6 +29,8 @@ export class CustomError extends BaseError {
 
     static fromObject(data) {
         switch (data.customErrorConstructorName) {
+            case 'IgnoreError':
+                return new IgnoreError();
             case 'TimeoutError':
                 return new TimeoutError(data);
             case 'NoNetworkError':
@@ -143,6 +145,11 @@ export class SilentError extends CustomError {
         );
     }
 }
+export class IgnoreError extends CustomError {
+    constructor() {
+        super({}, 'IgnoreError');
+    }
+}
 
 export class NoNetworkError extends CustomError {
     constructor(props?) {
@@ -180,6 +187,7 @@ export interface HTTPErrorProps {
     statusCode: number;
     responseHeaders?: Headers;
     message: string;
+    title?: string;
     requestParams: HTTPSOptions;
 }
 export class HTTPError extends CustomError {
@@ -204,7 +212,7 @@ export function wrapNativeHttpException(error, requestParams: HttpsRequestOption
         if (
             /(cancelled)/.test(message) ||
             (__ANDROID__ && /(SocketTimeout|ConnectException|SocketException|SSLException|UnknownHost)/.test(message)) ||
-            (__IOS__ && /(request timed out|unable to complete your request|ConnectException|connection was lost)/.test(message))
+            (__IOS__ && /(request timed out|unable to complete your request|ConnectException|connection was lost|connection appears to be offline)/.test(message))
         ) {
             return new TimeoutError();
         } else {

@@ -26,6 +26,9 @@ export async function showError(
         const reporterEnabled = SENTRY_ENABLED && isSentryEnabled;
         const errorType = typeof err;
         const realError = errorType === 'string' ? null : wrapNativeException(err);
+        if (realError.customErrorConstructorName === 'IgnoreError') {
+            return;
+        }
 
         const isString = realError === null || realError === undefined;
         let message = isString ? (err as string) : realError.message || realError.toString();

@@ -43,6 +43,8 @@ declare namespace svelteNative.JSX {
         elevation?: string | number;
         'on:closingModally'?: (args: ShownModallyData) => void;
         'on:closedBottomSheet'?: (args) => void;
+        iosAccessibilityMaxFontScale?: number;
+        iosAccessibilityMinFontScale?: number;
         // "on:shownModally"?: (args: ShownModallyData) => void;
     }
 
@@ -111,13 +113,22 @@ declare namespace svelteNative.JSX {
         onlinkTap?;
         'on:linkTap'?;
     }
-    interface WebViewAttributes {
+    interface WebViewAttributes {}
+    interface AWebViewAttributes extends WebViewAttributes {
         builtInZoomControls?: boolean;
         debugMode?: boolean;
         displayZoomControls?: boolean;
         nestedScrollView?: boolean;
         normalizeUrls?: boolean;
         webConsoleEnabled?: boolean;
+        webRTC?: boolean;
+        mediaPlaybackRequiresUserAction?: boolean;
+        domStorage?: boolean;
+        userAgent?: string;
+        createWebViewClient?: Function;
+        'on:shouldOverrideUrlLoading'?: (args) => void;
+        'on:loadFinished'?: (args) => void;
+        [key: `on:${string}`]: (args: any) => void;
     }
     interface TextFieldAttributes {
         floating?: boolean | string;
@@ -138,6 +149,7 @@ declare namespace svelteNative.JSX {
         'on:blur'?: (args) => void;
     }
     interface TextBaseAttributes {
+        iosAccessibilityAdjustsFontSize?: boolean;
         verticalTextAlignment?: string;
         fontWeight?: string | number;
         text?: string | number;
@@ -153,15 +165,10 @@ declare namespace svelteNative.JSX {
     interface SliderAttributes {
         stepSize?: number;
         trackBackgroundColor?: string | Color;
+        thumbColor?: string | Color;
     }
     interface ProgressAttributes {
         padding?: number | string;
-    }
-    interface WebViewAttributes {
-        domStorage?: boolean;
-        userAgent?: string;
-        'on:shouldOverrideUrlLoading'?: (args) => void;
-        'on:loadFinished'?: (args) => void;
     }
     interface PageAttributes {
         'on:sharedElementTo'?: (args) => void;
@@ -181,6 +188,7 @@ declare namespace svelteNative.JSX {
         cspan: CSpanAttributes;
         canvaslabel: CanvasLabelAttributes;
         canvasview: CanvasAttributes;
+        awebview: AWebViewAttributes;
         linechart: LineChartAttributes;
     };
 

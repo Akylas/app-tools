@@ -1,14 +1,17 @@
 import { InAppBrowser } from '@akylas/nativescript-inappbrowser';
 import { lc } from '@nativescript-community/l';
-import { AlertDialog, alert } from '@nativescript-community/ui-material-dialogs';
+import { AlertDialog, MDCAlertControlerOptions, alert } from '@nativescript-community/ui-material-dialogs';
 import { SnackBarOptions, showSnack as mdShowSnack } from '@nativescript-community/ui-material-snackbar';
-import { Application, Utils, View, ViewBase } from '@nativescript/core';
+import { Application, type GridLayout, Utils, type View, type ViewBase } from '@nativescript/core';
 import type LoadingIndicator__SvelteComponent_ from '@shared/components/LoadingIndicator.svelte';
 import LoadingIndicator from '@shared/components/LoadingIndicator.svelte';
 import { showError } from '@shared/utils/showError';
+import { ComponentProps } from 'svelte';
 import { NativeViewElementNode, createElement } from 'svelte-native/dom';
 import { get } from 'svelte/store';
-import { colors } from '~/variables';
+import { colors } from '@shared/variables';
+import type OptionSelect__SvelteComponent_ from '@shared/components/OptionSelect.svelte';
+import { AlertOptions } from '@nativescript/core/ui/dialogs/dialogs-common';
 
 export function timeout(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
@@ -35,8 +38,8 @@ export function createView<T extends View>(claz: new () => T, props: Partial<Pic
 
 export async function showSnack(options: SnackBarOptions) {
     try {
-        options.view = options.view || Application.getRootView();
-        return mdShowSnack(options);
+        // options.view = options.view || Application.getRootView();
+        return mdShowSnack({ ...options, iosIgnorePresentedViewController: (controller) => controller['isPopOverController'] === true });
     } catch (error) {}
 }
 
@@ -150,7 +153,7 @@ export async function hideLoading() {
     }
     showLoadingStartTime = null;
     if (loadingIndicator) {
-        loadingIndicator.hide();
+        return loadingIndicator.hide();
     }
 }
 export async function tryCatch<T = any>(callback: (...args) => Promise<T>, onErrorCb?, finallyCb?) {
@@ -176,4 +179,33 @@ export function tryCatchFunction<T = any>(callback: (...args) => Promise<T>, onE
             finallyCb?.();
         }
     };
+}
+export async function showAlertOptionSelect(props?: ComponentProps<OptionSelect__SvelteComponent_>, options?: Partial<AlertOptions & MDCAlertControlerOptions>) {
+    const component = (await import('@shared/components/OptionSelect.svelte')).default;
+    let componentInstanceInfo: ComponentInstanceInfo<GridLayout, OptionSelect__SvelteComponent_>;
+    try {
+        componentInstanceInfo = resolveComponentElement(component, {
+            onClose: (result) => {
+                view.bindingContext.closeCallback(result);
+            },
+            onCheckBox(item, value, e) {
+                view.bindingContext.closeCallback(item);
+            },
+            trackingScrollView: 'collectionView',
+            ...props
+        }) as ComponentInstanceInfo<GridLayout, OptionSelect__SvelteComponent_>;
+        const view: View = componentInstanceInfo.element.nativeView;
+        const result = await alert({
+            view,
+            okButtonText: lc('cancel'),
+            ...(options ? options : {})
+        });
+        return result;
+    } catch (err) {
+        throw err;
+    } finally {
+        componentInstanceInfo.element.nativeElement._tearDownUI();
+        componentInstanceInfo.viewInstance.$destroy();
+        componentInstanceInfo = null;
+    }
 }
