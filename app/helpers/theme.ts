@@ -12,7 +12,7 @@ import { setCustomCssRootClass } from '@shared/utils';
 import { showError } from '@shared/utils/showError';
 import { createGlobalEventListener, globalObservable } from '@shared/utils/svelte/ui';
 import { showAlertOptionSelect } from '@shared/utils/ui';
-import { updateThemeColors } from '@shared/variables';
+import { updateThemeColors } from '~/variables';
 import { writable } from 'svelte/store';
 
 export type Themes = 'auto' | 'light' | 'dark' | 'black';
