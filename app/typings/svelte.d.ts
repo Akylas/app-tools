@@ -4,7 +4,7 @@ type EventData = import('@nativescript/core').EventData;
 type LengthDipUnit = import('@nativescript/core/core-types').LengthDipUnit;
 type LengthPxUnit = import('@nativescript/core/core-types').LengthPxUnit;
 type LengthPercentUnit = import('@nativescript/core/core-types').LengthPercentUnit;
-type VisibilityType = import('@nativescript/core/core-types').CoreTypes.VisibilityType;
+type VisibilityType = import('@nativescript/core/core-types').VisibilityType;
 type ShownModallyData = import('@nativescript/core').ShownModallyData;
 type CanvasView = import('@nativescript-community/ui-canvas').CanvasView;
 type Canvas = import('@nativescript-community/ui-canvas').Canvas;
@@ -54,6 +54,8 @@ declare namespace svelteNative.JSX {
     }
 
     interface ImageAttributes {
+        aspectRatio?: number;
+        headers?: { [k: string]: string };
         noCache?: boolean;
         placeholderImageUri?: string;
         failureImageUri?: string;
@@ -65,6 +67,43 @@ declare namespace svelteNative.JSX {
         'on:rotateAnimated'?: (args) => void;
     }
 
+    interface CollectionViewAttributes extends ViewAttributes, TViewAttributes {
+        autoReloadItemOnLayout?: boolean;
+        isBounceEnabled?: boolean;
+        autoReloadItemOnLayout?: boolean;
+        autoSize?: boolean;
+        estimatedItemSize?: boolean;
+        scrollBarIndicatorVisible?: boolean;
+        layoutStyle?: string;
+        plugins?: string[];
+        isScrollEnabled?: boolean;
+        contentInsetAdjustmentBehavior?: number;
+        reverseLayout?: boolean;
+        orientation?: string;
+        reorderEnabled?: boolean;
+        verticalSpacing?: LengthType;
+        horizontalSpacing?: LengthType;
+        reorderLongPressEnabled?: boolean;
+        rowHeight?: number;
+        colWidth?: number;
+        animateItemUpdate?: boolean;
+        loadMoreThreshold?: number;
+        scrollOffset?: number;
+        itemTemplateSelector?: (item) => string;
+        itemIdGenerator?: (item, i: number) => string;
+        spanSize?: (item: any, index: number) => number;
+        itemOverlap?: (item: any, index: number) => [number, number, number, number];
+        items?: any;
+        padding?: string | number | LengthDipUnit | LengthPxUnit;
+        paddingBottom?: string | number | LengthDipUnit | LengthPxUnit;
+        paddingLeft?: string | number | LengthDipUnit | LengthPxUnit;
+        paddingRight?: string | number | LengthDipUnit | LengthPxUnit;
+        paddingTop?: string | number | LengthDipUnit | LengthPxUnit;
+
+        'on:itemReorderStarting'?: (args: EventData) => void;
+        'on:itemReordered'?: (args: EventData) => void;
+        'on:dataPopulated'?: (args: EventData) => void;
+    }
     interface CanvasAttributes extends GridLayoutAttributes {
         hardwareAccelerated?: boolean;
         'on:draw'?: (args: { canvas: Canvas; object: CanvasView }) => void;
@@ -190,6 +229,7 @@ declare namespace svelteNative.JSX {
         canvasview: CanvasAttributes;
         awebview: AWebViewAttributes;
         linechart: LineChartAttributes;
+        collectionview: CollectionViewAttributes;
     };
 
     type IntrinsicElementsAugmentedLowercase = Override<
