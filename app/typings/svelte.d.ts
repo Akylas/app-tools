@@ -89,8 +89,8 @@ declare namespace svelteNative.JSX {
         animateItemUpdate?: boolean;
         loadMoreThreshold?: number;
         scrollOffset?: number;
-        itemTemplateSelector?: (item) => string;
-        itemIdGenerator?: (item, i: number) => string;
+        itemTemplateSelector?: (item, index, items) => string;
+        itemIdGenerator?: (item, i: number) => number;
         spanSize?: (item: any, index: number) => number;
         itemOverlap?: (item: any, index: number) => [number, number, number, number];
         items?: any;
