@@ -265,6 +265,9 @@ const onInitRootView = function (force = false) {
                 right: Utils.layout.toDeviceIndependentPixels(inset[3])
             });
         });
+        if (!rootViewStyle) {
+            return;
+        }
         fonts.set({ mdi: rootViewStyle.getCssVariable('--mdiFontFamily') });
         actionBarHeight.set(parseFloat(rootViewStyle.getCssVariable('--actionBarHeight')));
         actionBarButtonHeight.set(parseFloat(rootViewStyle.getCssVariable('--actionBarButtonHeight')));
@@ -292,8 +295,11 @@ const onInitRootView = function (force = false) {
 
     if (__IOS__) {
         const rootView = Application.getRootView();
-        initRootViewCalled = !!rootView;
         const rootViewStyle = rootView?.style;
+        if (!rootViewStyle) {
+            return;
+        }
+        initRootViewCalled = !!rootView;
         fonts.set({ mdi: rootViewStyle.getCssVariable('--mdiFontFamily') });
 
         const currentColors = get(colors);
