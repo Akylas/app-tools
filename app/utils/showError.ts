@@ -26,13 +26,13 @@ export async function showError(
         const reporterEnabled = SENTRY_ENABLED && isSentryEnabled;
         const errorType = typeof err;
         const realError = errorType === 'string' ? null : wrapNativeException(err);
-        if (realError.customErrorConstructorName === 'IgnoreError') {
+        if (realError?.customErrorConstructorName === 'IgnoreError') {
             return;
         }
 
         const isString = realError === null || realError === undefined;
         let message = isString ? (err as string) : realError.message || realError.toString();
-        DEV_LOG && console.error('showError', message, realError?.['stack'], realError?.['stackTrace'], realError?.['nativeException']);
+        DEV_LOG && console.error('showError', message, realError?.['stack'], realError?.['stackTrace'], realError?.['nativeException'], showAsSnack);
         message = forcedMessage || message;
         if (showAsSnack || realError.showAsSnack || realError.customErrorConstructorName === 'NoNetworkError' || realError.customErrorConstructorName === 'TimeoutError') {
             showSnack({ message });

@@ -7,7 +7,7 @@ import type LoadingIndicator__SvelteComponent_ from '@shared/components/LoadingI
 import LoadingIndicator from '@shared/components/LoadingIndicator.svelte';
 import { showError } from '@shared/utils/showError';
 import { ComponentProps } from 'svelte';
-import { NativeViewElementNode, createElement } from 'svelte-native/dom';
+import { NativeViewElementNode, createElement } from '@nativescript-community/svelte-native/dom';
 import { get } from 'svelte/store';
 import { colors } from '~/variables';
 import type OptionSelect__SvelteComponent_ from '@shared/components/OptionSelect.svelte';
@@ -39,6 +39,7 @@ export function createView<T extends View>(claz: new () => T, props: Partial<Pic
 export async function showSnack(options: SnackBarOptions) {
     try {
         // options.view = options.view || Application.getRootView();
+        DEV_LOG && console.log('showSnack', options.message);
         return mdShowSnack({ ...options, iosIgnorePresentedViewController: (controller) => controller['isPopOverController'] === true });
     } catch (error) {}
 }
