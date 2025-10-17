@@ -22,7 +22,7 @@
         "noFallthroughCasesInSwitch": true,
         "resolveJsonModule": true,
         "lib": ["esnext", "es2017", "dom"],
-        "types": ["node", "svelte", "svelte-native", "@nativescript-community/svelte-native"],
+        "types": ["node", "svelte", "svelte-native"],
         "paths": {
             "~/*": ["../app/*"],
             "@shared/*": ["./app/*"],

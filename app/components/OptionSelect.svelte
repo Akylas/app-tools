@@ -12,7 +12,7 @@
     import ListItemAutoSize from '@shared/components/ListItemAutoSize.svelte';
     import { actionBarButtonHeight, colors } from '~/variables';
     import { onDestroy } from 'svelte';
-    import { Template } from '@nativescript-community/svelte-native/components';
+    import { Template } from 'svelte-native/components';
     export interface OptionType {
         group?: string;
         name?: string;
