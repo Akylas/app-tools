@@ -22,7 +22,7 @@ export class CustomError extends BaseError {
     assignedLocalData: any;
     silent?: boolean;
     _customStack?: string;
-    sentryReportTranslatedName = false;
+    sentryReportTranslatedName = true;
 
     get extraData() {
         return { errorType: this.customErrorConstructorName, data: this.localData };
@@ -181,7 +181,7 @@ export interface HTTPErrorProps {
 export class HTTPError extends CustomError {
     statusCode: number;
     requestParams: HTTPSOptions;
-    sentryReportTranslatedName = true;
+    sentryReportTranslatedName = false;
     constructor(props: HTTPErrorProps | HTTPError) {
         super(
             Object.assign(
