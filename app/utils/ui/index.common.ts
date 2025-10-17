@@ -9,7 +9,7 @@ import { showError } from '@shared/utils/showError';
 import { ComponentProps } from 'svelte';
 import { NativeViewElementNode, createElement } from 'svelte-native/dom';
 import { get } from 'svelte/store';
-import { colors } from '@shared/variables';
+import { colors } from '~/variables';
 import type OptionSelect__SvelteComponent_ from '@shared/components/OptionSelect.svelte';
 import { AlertOptions } from '@nativescript/core/ui/dialogs/dialogs-common';
 

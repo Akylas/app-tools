@@ -10,7 +10,7 @@
     import IconButton from '@shared/components/IconButton.svelte';
     import ListItem from '@shared/components/ListItem.svelte';
     import ListItemAutoSize from '@shared/components/ListItemAutoSize.svelte';
-    import { actionBarButtonHeight, colors } from '@shared/variables';
+    import { actionBarButtonHeight, colors } from '~/variables';
     import { onDestroy } from 'svelte';
     import { Template } from 'svelte-native/components';
     export interface OptionType {

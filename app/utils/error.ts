@@ -17,6 +17,7 @@ function evalTemplateString(resource: string, obj: object) {
 
 export class CustomError extends BaseError {
     customErrorConstructorName: string;
+    showAsSnack?: boolean;
     isCustomError = true;
     assignedLocalData: any;
     silent?: boolean;
@@ -112,56 +113,43 @@ export class CustomError extends BaseError {
     getMessage() {}
 }
 
+function customErrorProps(args, defaultName) {
+    if (typeof args === 'object') {
+        return {
+            ...args,
+            message: args.message ?? defaultName
+        };
+    } else {
+        return {
+            message: args ?? defaultName
+        };
+    }
+}
+
 export class TimeoutError extends CustomError {
     constructor(props?) {
-        super(
-            Object.assign(
-                {
-                    message: lc('timeout_error')
-                },
-                props
-            ),
-            'TimeoutError'
-        );
+        super(customErrorProps(props, lc('timeout_error')), 'TimeoutError');
     }
 }
 export class PermissionError extends CustomError {
-    constructor(message?) {
-        super(
-            {
-                message: message ?? lc('permission_error')
-            },
-            'PermissionError'
-        );
+    constructor(props?) {
+        super(customErrorProps(props, lc('permission_error')), 'PermissionError');
     }
 }
 export class SilentError extends CustomError {
-    constructor(message?) {
-        super(
-            {
-                message: message ?? 'silent_error'
-            },
-            'SilentError'
-        );
+    constructor(props?) {
+        super(customErrorProps(props, lc('silent_error')), 'SilentError');
     }
 }
 export class IgnoreError extends CustomError {
-    constructor() {
-        super({}, 'IgnoreError');
+    constructor(props?) {
+        super(props, 'IgnoreError');
     }
 }
 
 export class NoNetworkError extends CustomError {
     constructor(props?) {
-        super(
-            Object.assign(
-                {
-                    message: lc('no_network')
-                },
-                props
-            ),
-            'NoNetworkError'
-        );
+        super(customErrorProps(props, lc('no_network')), 'NoNetworkError');
     }
 }
 export interface HTTPErrorProps {

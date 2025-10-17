@@ -34,7 +34,7 @@ export async function showError(
         let message = isString ? (err as string) : realError.message || realError.toString();
         DEV_LOG && console.error('showError', message, realError?.['stack'], realError?.['stackTrace'], realError?.['nativeException']);
         message = forcedMessage || message;
-        if (showAsSnack || realError.customErrorConstructorName === 'NoNetworkError' || realError.customErrorConstructorName === 'TimeoutError') {
+        if (showAsSnack || realError.showAsSnack || realError.customErrorConstructorName === 'NoNetworkError' || realError.customErrorConstructorName === 'TimeoutError') {
             showSnack({ message });
             return;
         }
