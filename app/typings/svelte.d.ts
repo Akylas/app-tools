@@ -77,6 +77,7 @@ declare namespace svelteNative.JSX {
         layoutStyle?: string;
         plugins?: string[];
         isScrollEnabled?: boolean;
+        nestedScrollingEnabled?: boolean;
         contentInsetAdjustmentBehavior?: number;
         reverseLayout?: boolean;
         orientation?: string;
@@ -102,7 +103,10 @@ declare namespace svelteNative.JSX {
 
         'on:itemReorderStarting'?: (args: EventData) => void;
         'on:itemReordered'?: (args: EventData) => void;
+        'on:itemReorderCheck'?: (args: EventData) => void;
         'on:dataPopulated'?: (args: EventData) => void;
+        'on:scroll'?: (args: EventData) => void;
+        'on:layoutCompleted'?: (args: EventData) => void;
     }
     interface CanvasAttributes extends GridLayoutAttributes {
         hardwareAccelerated?: boolean;
