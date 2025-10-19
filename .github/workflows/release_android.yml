@@ -122,11 +122,8 @@ jobs:
         id: yarn-cache-dir-path
         run: echo "::set-output name=dir::$(yarn config get globalFolder)"
 
-      - name: Remove package.json resolutions
-        run: echo "`jq 'delpaths([["resolutions"]])' package.json`" > package.json
-
-      # - name: Remove yarn.lock to ensure we dont rely on it
-      #   run: rm yarn.lock
+      - name: Clean resolutions (keep only those starting with "patch:")
+        run: jq 'if .resolutions then .resolutions |= with_entries(select(.value | startswith("patch:"))) else . end' package.json > package.json
 
       - uses: actions/cache@v4
         name: Handle node_modules Cache
