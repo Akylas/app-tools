@@ -23,7 +23,7 @@ yarn-error.log*
 .cloud
 .gradle
 .project
-.yarn
+.yarn/install-state.gz
 .cxx
 tmp/
 
