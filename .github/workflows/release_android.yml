@@ -122,8 +122,22 @@ jobs:
         id: yarn-cache-dir-path
         run: echo "::set-output name=dir::$(yarn config get globalFolder)"
 
-      - name: Clean resolutions (keep only those starting with "patch:")
-        run: jq 'if .resolutions then .resolutions |= with_entries(select(.value | startswith("patch:"))) else . end' package.json > package.json
+      - name: Clean non-patch resolutions
+        run: |
+          node -e '
+            const fs = require("fs");
+            try {
+              const pkg = JSON.parse(fs.readFileSync("package.json", "utf8"));
+              if (pkg.resolutions) {
+                pkg.resolutions = Object.fromEntries(
+                  Object.entries(pkg.resolutions).filter(([_, v]) => typeof v === "string" && v.startsWith("patch:"))
+                );
+              }
+              fs.writeFileSync("package.json", JSON.stringify(pkg, null, 2));
+            } catch (e) {
+              console.warn("Skipping cleanup: invalid package.json");
+            }
+          '
 
       - uses: actions/cache@v4
         name: Handle node_modules Cache
