@@ -27,5 +27,8 @@
         "sync": "node ./tools/sync.mjs",
         "update": "node ./tools/update.mjs",
         "set_version":"node tools/scripts/set-version.mjs set-version"
+    },
+    "resolutions": {
+        "svelte-check@npm:4.3.1": "patch:svelte-check@npm%3A4.3.1#~/.yarn/patches/svelte-check-npm-4.3.1-7aa559b153.patch"
     }
 }

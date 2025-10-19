@@ -94,6 +94,7 @@ removeOldFiles(['./.prettierrc']);
 const commonPackageJSON = JSON.parse(readFileSync('./tools/package.json.template'));
 checkAndUpdate(commonPackageJSON['scripts'], 'scripts');
 checkAndUpdate(commonPackageJSON['packageManager'], 'packageManager');
+checkAndUpdate(commonPackageJSON['resolutions'], 'resolutions');
 
 writeFileSync('./package.json', JSON.stringify(pluginPackageJSON, 0, 4) + '\n');
 

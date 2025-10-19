@@ -84,8 +84,8 @@ declare namespace svelteNative.JSX {
         verticalSpacing?: LengthType;
         horizontalSpacing?: LengthType;
         reorderLongPressEnabled?: boolean;
-        rowHeight?: number;
-        colWidth?: number;
+        rowHeight?: number | string;
+        colWidth?: number | string;
         animateItemUpdate?: boolean;
         loadMoreThreshold?: number;
         scrollOffset?: number;
