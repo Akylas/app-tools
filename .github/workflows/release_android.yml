@@ -51,7 +51,7 @@ on:
 
 jobs:
   release:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -85,38 +85,38 @@ jobs:
           
           # all of these default to true, but feel free to set to
           # "false" if necessary for your workflow
-          android: true
+          android: false
           dotnet: true
           haskell: true
           large-packages: false
           docker-images: true
           swap-storage: true
 
-      - name: Setup JDK
-        uses: actions/setup-java@v3
-        with:
-          cache: gradle
-          java-version: 17
-          distribution: 'temurin'
+      # - name: Setup JDK
+      #   uses: actions/setup-java@v3
+      #   with:
+      #     cache: gradle
+      #     java-version: 17
+      #     distribution: 'temurin'
 
-      - name: setup node
-        uses: actions/setup-node@v4
-        with:
-          node-version: lts/*
+      # - name: setup node
+      #   uses: actions/setup-node@v4
+      #   with:
+      #     node-version: lts/*
 
-      - name: Install Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: 3.12
+      # - name: Install Python
+      #   uses: actions/setup-python@v5
+      #   with:
+      #     python-version: 3.12
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+      # - name: Setup Android SDK
+      #   uses: android-actions/setup-android@v3
 
-      - uses: nttld/setup-ndk@v1
-        id: setup-ndk
-        with:
-          ndk-version: r27c
-          local-cache: true
+      # - uses: nttld/setup-ndk@v1
+      #   id: setup-ndk
+      #   with:
+      #     ndk-version: r27c
+      #     local-cache: true
 
       - name: install jq
         run: sudo apt-get install jq
