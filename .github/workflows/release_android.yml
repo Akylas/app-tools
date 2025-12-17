@@ -109,8 +109,8 @@ jobs:
       #   with:
       #     python-version: 3.12
 
-      # - name: Setup Android SDK
-      #   uses: android-actions/setup-android@v3
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
 
       # - uses: nttld/setup-ndk@v1
       #   id: setup-ndk
