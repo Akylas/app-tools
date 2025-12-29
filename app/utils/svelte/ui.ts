@@ -50,12 +50,39 @@ export function createUnregisterGlobalEventListener(eventName: string) {
     };
 }
 
-export function fade(node, { delay = 0, duration = 400, easing = easings.easeInOutQuart }) {
+export function fade(node, { delay = 0, duration = 400, easing = easings.easeInOutQuart } = {}) {
     const opacity = node.nativeView.opacity;
     return asSvelteTransition(node, delay, duration, easing, (t) => ({
         opacity: t * opacity
     }));
 }
+
+export function slide(node, { delay = 0, duration = 400, easing = easings.easeInOutQuart, translation = 200 }) {
+    return asSvelteTransition(node, delay, duration, easing, (t) => ({
+        translate: {
+            x: 0,
+            y: (1 - t) * translation
+        }
+    }));
+}
+
+// function slide(node, { delay = 0, duration = 400, easing = CoreTypes.AnimationCurve.easeOut }) {
+//     const height = node.nativeView.effectiveHeight;
+//     const scaleX = node.nativeView.scaleX;
+//     const scaleY = node.nativeView.scaleY;
+//     const translateX = node.nativeView.translateX;
+//     const translateY = node.nativeView.translateY;
+//     return asSvelteTransition(node, delay, duration, easing, t => ({
+//         scale: {
+//             x: scaleX,
+//             y: t * scaleY
+//         },
+//         translate: {
+//             x: translateX,
+//             y: translateY - t * 0.5 * height
+//         }
+//     }));
+// }
 
 export function scale(node, { delay = 0, duration = 400, easing = easings.easeInOutQuart }) {
     const scaleX = node.nativeView.scaleX;
