@@ -159,6 +159,10 @@ jobs:
           sh scripts/ci.prepare.sh --platform ios --flavor "${{ inputs.flavor }}" --version "${{ env.VERSION_STR }}"
 
       - name: publish
+        env:
+          # provide both names: some fastlane plugins expect GITHUB_API_TOKEN, others use GITHUB_TOKEN
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           bundle exec fastlane ios alpha create_tag:${{ inputs.publish }} publish:${{ inputs.publish }} sentry:${{ inputs.sentry }} github:${{ inputs.github }}
       
