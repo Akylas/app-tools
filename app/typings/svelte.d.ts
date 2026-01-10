@@ -13,6 +13,8 @@ type PanGestureHandlerOptions = import('@nativescript-community/gesturehandler')
 type PinchGestureHandlerOptions = import('@nativescript-community/gesturehandler').PinchGestureHandlerOptions;
 type RotationGestureHandlerOptions = import('@nativescript-community/gesturehandler').RotationGestureHandlerOptions;
 type TapGestureHandlerOptions = import('@nativescript-community/gesturehandler').TapGestureHandlerOptions;
+type FlingGestureHandlerOptions = import('@nativescript-community/gesturehandler').FlingGestureHandlerOptions;
+type LongPressGestureHandlerOptions = import('@nativescript-community/gesturehandler').LongPressGestureHandlerOptions;
 type HighlightEventData = import('@nativescript-community/ui-chart/charts/Chart').HighlightEventData;
 
 declare module 'svelte/internal' {
@@ -46,6 +48,14 @@ declare namespace svelteNative.JSX {
         iosAccessibilityMaxFontScale?: number;
         iosAccessibilityMinFontScale?: number;
         // "on:shownModally"?: (args: ShownModallyData) => void;
+
+        tapGestureOptions?: Partial<TapGestureHandlerOptions> | ((view: View, tag: number, rootTag: number) => Partial<TapGestureHandlerOptions>);
+        panGestureOptions?: Partial<PanGestureHandlerOptions> | ((view: View, tag: number, rootTag: number) => Partial<PanGestureHandlerOptions>);
+        doubleTapGestureOptions?: Partial<TapGestureHandlerOptions> | ((view: View, tag: number, rootTag: number) => Partial<TapGestureHandlerOptions>);
+        longPressGestureOptions?: Partial<LongPressGestureHandlerOptions> | ((view: View, tag: number, rootTag: number) => Partial<LongPressGestureHandlerOptions>);
+        swipeGestureOptions?: Partial<FlingGestureHandlerOptions> | ((view: View, tag: number, rootTag: number) => Partial<FlingGestureHandlerOptions>);
+        pinchGestureOptions?: Partial<PinchGestureHandlerOptions> | ((view: View, tag: number, rootTag: number) => Partial<PinchGestureHandlerOptions>);
+        rotationGestureOptions?: Partial<RotationGestureHandlerOptions> | ((view: View, tag: number, rootTag: number) => Partial<RotationGestureHandlerOptions>);
     }
 
     interface ButtonAttributes {
