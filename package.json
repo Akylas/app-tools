@@ -44,7 +44,7 @@
         "stats-webpack-plugin": "0.7.0",
         "string-replace-loader": "3.2.0",
         "svelte": "4.2.20",
-        "svelte-check": "4.3.4",
+        "svelte-check": "4.3.5",
         "svelte-loader": "3.2.4",
         "svelte-native-preprocessor": "~1.0.0",
         "svelte-preprocess": "6.0.3",
