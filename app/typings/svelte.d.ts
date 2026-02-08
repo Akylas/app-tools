@@ -232,6 +232,10 @@ declare namespace svelteNative.JSX {
         keepScreenAwake?: boolean;
         screenBrightness?: number;
     }
+    interface SpanAttributes {
+        linkColor?: string;
+        html?: string;
+    }
     interface CSpanAttributes extends TextBaseAttributes, SpanAttributes {}
     interface CanvasLabelAttributes extends CanvasAttributes, LabelAttributes {}
 
