@@ -51,7 +51,7 @@ on:
 
 jobs:
   release:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -76,31 +76,47 @@ jobs:
           ruby-version: '3.3' # Not needed with a `.ruby-version` or `.tool-versions`
           bundler-cache: true # runs 'bundle install' and caches installed gems automatically
 
-      - name: Setup JDK
-        uses: actions/setup-java@v3
+      - name: Free Disk Space (Ubuntu)
+        uses: jlumbroso/free-disk-space@main
         with:
-          cache: gradle
-          java-version: 17
-          distribution: 'temurin'
+          # this might remove tools that are actually needed,
+          # if set to "true" but frees about 6 GB
+          tool-cache: false
+          
+          # all of these default to true, but feel free to set to
+          # "false" if necessary for your workflow
+          android: false
+          dotnet: true
+          haskell: true
+          large-packages: false
+          docker-images: true
+          swap-storage: true
 
-      - name: setup node
-        uses: actions/setup-node@v4
-        with:
-          node-version: lts/*
+      # - name: Setup JDK
+      #   uses: actions/setup-java@v3
+      #   with:
+      #     cache: gradle
+      #     java-version: 17
+      #     distribution: 'temurin'
 
-      - name: Install Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: 3.12
+      # - name: setup node
+      #   uses: actions/setup-node@v4
+      #   with:
+      #     node-version: lts/*
+
+      # - name: Install Python
+      #   uses: actions/setup-python@v5
+      #   with:
+      #     python-version: 3.12
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - uses: nttld/setup-ndk@v1
-        id: setup-ndk
-        with:
-          ndk-version: r27c
-          local-cache: true
+      # - uses: nttld/setup-ndk@v1
+      #   id: setup-ndk
+      #   with:
+      #     ndk-version: r27c
+      #     local-cache: true
 
       - name: install jq
         run: sudo apt-get install jq
@@ -208,6 +224,10 @@ jobs:
       
       - name: publish github
         if: inputs.github == 'true' || inputs.fakepublish == 'true'
+        env:
+          # provide both names: some fastlane plugins expect GITHUB_API_TOKEN, others use GITHUB_TOKEN
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           bundle exec fastlane android github create_tag:${{ inputs.publish }} publish:${{ inputs.github }} sentry:${{ inputs.sentry_fdroid }} github:${{ inputs.github }} logging:${{ inputs.logging }}
       

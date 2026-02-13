@@ -31,7 +31,7 @@
             "svelte-native": ["../node_modules/@nativescript-community/svelte-nativem"],
             "svelte-native/*": ["../node_modules/@nativescript-community/svelte-native/*"],
             "@nativescript/core": ["../node_modules/@akylas/nativescript"],
-            "@nativescript/core/*": ["../node_modules/@akylas/nativescript/*"]
+            "@nativescript/core/*": ["../node_modules/@akylas/nativescript/*"],
         }
     },
     "include": ["./app/components/**/*.svelte", "./app/**/*.ts", "./app/**/*.svelte", "../app/**/*.ts", "../app/**/*.svelte", "../typings/*.d.ts"],

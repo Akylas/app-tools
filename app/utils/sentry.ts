@@ -9,7 +9,7 @@ export let isSentryEnabled = false;
 export async function startSentry() {
     try {
         if (SENTRY_ENABLED) {
-            Sentry = require('@nativescript-community/sentry');
+            Sentry = await import('@nativescript-community/sentry');
             Sentry.init({
                 debug: DEV_LOG,
                 dsn: SENTRY_DSN,
