@@ -3,7 +3,7 @@ import Theme from '@nativescript-community/css-theme';
 import { lc } from '@nativescript-community/l';
 import { confirm } from '@nativescript-community/ui-material-dialogs';
 import { closePopover } from '@nativescript-community/ui-popover/svelte';
-import { Application, ApplicationSettings, SystemAppearanceChangedEventData, Utils } from '@nativescript/core';
+import { Application, ApplicationEventData, ApplicationSettings, SystemAppearanceChangedEventData, Utils } from '@nativescript/core';
 import { getBoolean, getString, setString } from '@nativescript/core/application-settings';
 import { SDK_VERSION } from '@nativescript/core/utils';
 import { ALERT_OPTION_MAX_HEIGHT, DEFAULT_COLOR_THEME, SETTINGS_COLOR_THEME } from '@shared/constants';
@@ -13,7 +13,7 @@ import { showError } from '@shared/utils/showError';
 import { createGlobalEventListener, globalObservable } from '@shared/utils/svelte/ui';
 import { showAlertOptionSelect } from '@shared/utils/ui';
 import { updateThemeColors } from '~/variables';
-import { writable } from 'svelte/store';
+import { get, writable } from 'svelte/store';
 
 export type Themes = 'auto' | 'light' | 'dark' | 'black';
 export type ColorThemes = 'default' | 'eink' | 'dynamic';
@@ -34,7 +34,11 @@ export let isEInk = colorTheme === 'eink';
 
 Application.on(Application.systemAppearanceChangedEvent, (event: SystemAppearanceChangedEventData) => {
     try {
-        DEV_LOG && console.log('systemAppearanceChangedEvent', theme, event.newValue, autoDarkToBlack);
+        if (__IOS__ && background) {
+            // ignore theme change on background
+            return;
+        }
+        DEV_LOG && console.log('systemAppearanceChangedEvent', theme, event.newValue, autoDarkToBlack, new Error().stack);
         if (theme === 'auto') {
             event.cancel = true;
             let realTheme = event.newValue as Themes;
@@ -47,13 +51,15 @@ Application.on(Application.systemAppearanceChangedEvent, (event: SystemAppearanc
                     AppUtilsAndroid.applyDayNight(activity, useDynamicColors);
                 }
             }
-            Theme.setMode(Theme.Auto, undefined, realTheme, false);
-            updateThemeColors(realTheme, colorTheme);
             //close any popover as they are not updating with theme yet
-            closePopover();
-            currentRealTheme.set(realTheme);
-            DEV_LOG && console.log('systemAppearanceChangedEvent notify', realTheme);
-            globalObservable.notify({ eventName: 'theme', data: realTheme });
+            DEV_LOG && console.log('systemAppearanceChangedEvent notify', realTheme, get(currentRealTheme));
+            if (get(currentRealTheme) !== realTheme) {
+                Theme.setMode(Theme.Auto, undefined, realTheme, false);
+                updateThemeColors(realTheme, colorTheme);
+                closePopover();
+                currentRealTheme.set(realTheme);
+                globalObservable.notify({ eventName: 'theme', data: realTheme });
+            }
         }
     } catch (error) {
         showError(error);
@@ -226,7 +232,27 @@ export function getRealThemeAndUpdateColors() {
     const realTheme = getRealTheme(theme);
     updateThemeColors(realTheme, colorTheme);
 }
-
+let background = false;
+function onAppForeground(args: ApplicationEventData) {
+    if (background) {
+        background = false;
+        if (__IOS__ && theme === 'auto') {
+            const realTheme = getRealTheme(theme);
+            if (realTheme !== get(currentTheme)) {
+                Theme.setMode(Theme.Auto, undefined, realTheme, false);
+                updateThemeColors(realTheme, colorTheme);
+                closePopover();
+                currentRealTheme.set(realTheme);
+                globalObservable.notify({ eventName: 'theme', data: realTheme });
+            }
+        }
+    }
+}
+function onAppBackground(args: ApplicationEventData) {
+    if (!background) {
+        background = true;
+    }
+}
 export function start() {
     if (started) {
         return;
@@ -240,7 +266,8 @@ export function start() {
     if (theme.length === 0) {
         theme = DEFAULT_THEME as Themes;
     }
-
+    Application.on(Application.foregroundEvent, onAppForeground);
+    Application.on(Application.backgroundEvent, onAppBackground);
     prefs.on('key:auto_black', () => {
         autoDarkToBlack = getBoolean('auto_black');
         DEV_LOG && console.log('key:auto_black', theme, autoDarkToBlack);
