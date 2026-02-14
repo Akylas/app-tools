@@ -221,6 +221,10 @@ jobs:
         if: inputs.publish == 'true' || (inputs.fakepublish == 'true' && inputs.android_playstore == 'true')
         run: |
           bundle exec fastlane android beta create_tag:${{ inputs.publish }} publish:${{ inputs.publish }} sentry:${{ inputs.sentry }} github:false logging:${{ inputs.logging }}
+        env:
+          # provide both names: some fastlane plugins expect GITHUB_API_TOKEN, others use GITHUB_TOKEN
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
       - name: publish github
         if: inputs.github == 'true' || inputs.fakepublish == 'true'
