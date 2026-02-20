@@ -117,6 +117,7 @@ export function updateLoadingProgress(msg: Partial<ShowLoadingOptions>) {
 export async function showLoading(msg?: string | ShowLoadingOptions) {
     try {
         const text = (msg as any)?.text || (typeof msg === 'string' && msg) || lc('loading');
+    // DEV_LOG && console.log('showLoading', text);
         const indicator = getLoadingIndicator();
         indicator.instance.onButtonTap = msg?.['onButtonTap'];
         const props = {
@@ -146,6 +147,7 @@ export async function hideLoading() {
     if (!loadingIndicator) {
         return;
     }
+    // DEV_LOG && console.log('hideLoading', new Error().stack);
     const delta = showLoadingStartTime ? Date.now() - showLoadingStartTime : -1;
     if (__IOS__ && delta >= 0 && delta < 1000) {
         await timeout(1000 - delta);
