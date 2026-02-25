@@ -3,7 +3,7 @@ import { Label } from '@nativescript-community/ui-label';
 import { MDCAlertControlerOptions, alert as mdAlert } from '@nativescript-community/ui-material-dialogs';
 import { AlertOptions } from '@nativescript/core';
 import { wrapNativeException } from '@nativescript/core/utils';
-import { CustomError, NoNetworkError, TimeoutError } from '@shared/utils/error';
+import { CustomError, NoNetworkError, TimeoutError } from '@akylas/nativescript-app-utils/error';
 import { Sentry, isSentryEnabled } from '@shared/utils/sentry';
 import { createView, showSnack } from '@shared/utils/ui';
 import { get } from 'svelte/store';
