@@ -38,6 +38,8 @@ declare namespace svelteNative.JSX {
         'prop:bottomDrawer'?;
         'prop:topDrawer'?;
         disableCss?: boolean;
+        exclusiveTouch?: boolean;
+        disallowInterceptTouch?: boolean;
         rippleColor?: string | Color;
         sharedTransitionTag?: string;
         verticalAlignment?: string;
@@ -186,6 +188,7 @@ declare namespace svelteNative.JSX {
     interface TextFieldAttributes {
         floating?: boolean | string;
         variant?: string;
+        error?: string;
         placeholder?: string;
         placeholderColor?: string | Color;
         'on:returnPress'?: (args) => void;
@@ -210,6 +213,8 @@ declare namespace svelteNative.JSX {
     interface SpanAttributes {
         verticalAlignment?: string;
         verticalTextAlignment?: string;
+        onlinkTap?;
+        'on:linkTap'?;
     }
     interface ProgressAttributes {
         busy?: boolean;
