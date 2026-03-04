@@ -1,6 +1,6 @@
 import { Application, EventData, Frame, Observable, Page, PageBase, View } from '@nativescript/core';
 import { throttle } from '@nativescript/core/utils';
-import { onDestroy } from 'svelte';
+import { EventDispatcher, onDestroy } from 'svelte';
 import { closeModal as sCloseModal, goBack as sGoBack, navigate as sNavigate, showModal as sShowModal } from '@nativescript-community/svelte-native';
 import { BackNavigationOptions, NavigationOptions, ShowModalOptions, resolveTarget } from '@nativescript-community/svelte-native/dom';
 import { asSvelteTransition, easings } from '@nativescript-community/svelte-native/transitions';
@@ -111,9 +111,9 @@ export function conditionalEvent(node, { callback, condition, event }) {
     };
 }
 
-export function createEventDispatcher<T>() {
+export function createEventDispatcher<EventMap extends Record<string, any> = any>(): EventDispatcher<EventMap> {
     const component = get_current_component();
-    return (type, event?: T) => {
+    return (type, event?, options?) => {
         const callbacks = component.$$.callbacks[type];
         if (callbacks) {
             callbacks.slice().forEach((fn) => {
