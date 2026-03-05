@@ -8,7 +8,7 @@ import sort from 'eslint-plugin-sort';
 import globals from 'globals';
 import svelteParser from 'svelte-eslint-parser';
 import tseslint from 'typescript-eslint';
-const ignoreWarnings = ['a11y-no-onchange', 'a11y-label-hhas-associated-control', 'illegal-attribute-character'];
+const ignoreWarnings = ['a11y-no-onchange', 'a11y-label-hhas-associated-control', 'illegal-attribute-character', 'illegal-attribute-character'];
 export default [
     ...tseslint.configs.recommendedTypeChecked,
     eslintPluginPrettierRecommended,

@@ -249,7 +249,7 @@ let initRootViewCalled = false;
 export function onInitRootViewFromEvent() {
     onInitRootView();
 }
-const onInitRootView = function (force = false) {
+export const onInitRootView = function (force = false) {
     if (!force && initRootViewCalled) {
         return;
     }

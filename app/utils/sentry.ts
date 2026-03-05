@@ -67,3 +67,13 @@ export async function startSentry() {
         console.error('startSentry', err, err['stack']);
     }
 }
+
+export function setSentryExtra(key: string, value: any) {
+    Sentry?.setExtra(key, value);
+}
+
+export function withSentryScope(callback: (scope: SentryType.Scope) => void) {
+    if (Sentry) {
+        return Sentry.withScope(callback);
+    }
+}

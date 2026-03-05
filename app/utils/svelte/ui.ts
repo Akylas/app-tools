@@ -1,8 +1,8 @@
-import { EventData, Frame, Observable, View } from '@nativescript/core';
+import { Application, EventData, Frame, Observable, Page, PageBase, View } from '@nativescript/core';
 import { throttle } from '@nativescript/core/utils';
-import { onDestroy } from 'svelte';
+import { EventDispatcher, onDestroy } from 'svelte';
 import { closeModal as sCloseModal, goBack as sGoBack, navigate as sNavigate, showModal as sShowModal } from '@nativescript-community/svelte-native';
-import { BackNavigationOptions, NavigationOptions, ShowModalOptions } from '@nativescript-community/svelte-native/dom';
+import { BackNavigationOptions, NavigationOptions, ShowModalOptions, resolveTarget } from '@nativescript-community/svelte-native/dom';
 import { asSvelteTransition, easings } from '@nativescript-community/svelte-native/transitions';
 import { get_current_component } from 'svelte/internal';
 
@@ -111,9 +111,9 @@ export function conditionalEvent(node, { callback, condition, event }) {
     };
 }
 
-export function createEventDispatcher<T>() {
+export function createEventDispatcher<EventMap extends Record<string, any> = any>(): EventDispatcher<EventMap> {
     const component = get_current_component();
-    return (type, event?: T) => {
+    return (type, event?, options?) => {
         const callbacks = component.$$.callbacks[type];
         if (callbacks) {
             callbacks.slice().forEach((fn) => {
@@ -139,10 +139,33 @@ export function navigate<T>(options: NavigationOptions<T>) {
     return throttledSNavigate<T>(options);
 }
 
+function createNavigatedData(page: Page, eventName: string) {
+    return {
+        eventName,
+        object: page,
+        context: page.navigationContext
+    };
+}
+
+let hiddenPageByModal: Page = null;
 export function closeModal(result?: any, parent?: View) {
+    if (hiddenPageByModal) {
+        hiddenPageByModal.notify(createNavigatedData(hiddenPageByModal, PageBase.navigatedToEvent));
+        hiddenPageByModal = null;
+    }
     return sCloseModal(result, parent);
 }
 
 export function showModal<T, U>(modalOptions: ShowModalOptions<U>): Promise<T> {
+    if (modalOptions.fullscreen) {
+        const modalLauncher = resolveTarget(modalOptions.target) || Frame.topmost().currentPage || Application.getRootView();
+        hiddenPageByModal = modalLauncher instanceof Page ? modalLauncher : modalLauncher.page;
+        hiddenPageByModal.notify(createNavigatedData(hiddenPageByModal, PageBase.navigatingFromEvent));
+        setTimeout(() => {
+            if (hiddenPageByModal['_modal']) {
+                hiddenPageByModal.notify(createNavigatedData(hiddenPageByModal, PageBase.navigatedFromEvent));
+            }
+        }, 1000);
+    }
     return sShowModal(modalOptions);
 }

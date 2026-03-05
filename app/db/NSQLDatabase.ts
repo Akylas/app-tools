@@ -2,7 +2,7 @@ import SqlQuery from 'kiss-orm/dist/Queries/SqlQuery';
 import DatabaseInterface from 'kiss-orm/dist/Databases/DatabaseInterface';
 import migrate from 'kiss-orm/dist/Databases/Common/migrate';
 import { SQLiteDatabase, openOrCreate, wrapDb } from '@nativescript-community/sqlite';
-import { NoSpaceLeftError } from '@shared/utils/error';
+import { NoSpaceLeftError } from '@akylas/nativescript-app-utils/error';
 
 function formatIdentifier(i: string): string {
     return i;
