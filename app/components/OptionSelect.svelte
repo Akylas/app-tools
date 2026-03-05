@@ -221,6 +221,8 @@
                         id="checkbox"
                         boxType={item.boxType}
                         checked={item.value}
+                        ios:marginLeft={0}
+                        ios:marginRight={10}
                         col={item.boxType === 'circle' ? 0 : 2}
                         verticalAlignment="center"
                         on:checkedChange={(e) => onCheckedChanged(item, e)} />
