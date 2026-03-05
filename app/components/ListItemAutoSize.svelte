@@ -18,6 +18,7 @@
     export let showBottomLine: boolean = false;
     // export let iconFontSize: number = 24;
     export let fontSize: number = 20;
+    export let useExtraPadding: boolean = true;
     export let fontWeight: any = 'normal';
     export let subtitleFontSize: number = 14;
     export let title: string = null;
@@ -55,7 +56,7 @@
         onDraw?.(event);
     }
 
-    $: addedPadding = (subtitle?.length > 0 ? 6 : 10) + (__ANDROID__ ? 8 : 12);
+    $: addedPadding = useExtraPadding ? (subtitle?.length > 0 ? 6 : 10) + (__ANDROID__ ? 8 : 12) : 0;
 </script>
 
 <!-- <gridlayout>
