@@ -42,7 +42,7 @@ jobs:
 
       - uses: maxim-lobanov/setup-xcode@7f352e61cbe8130c957c3bc898c4fb025784ea1e
         with:
-          xcode-version: 16.4
+          xcode-version: 26.3
 
       - uses: oleksiyrudenko/gha-git-credentials@v2-latest
         with:
