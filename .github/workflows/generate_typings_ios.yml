@@ -128,7 +128,7 @@ jobs:
 
       - name: publish
         run: |
-          ns typings ios
+          bundle exec fastlane run_sh command:"ns typings ios" 
       
       - uses: actions/upload-artifact@v4
         with:
