@@ -1,0 +1,133 @@
+name: 'release'
+
+on:
+  workflow_call:
+
+jobs:
+  release:
+    permissions:
+      contents: write
+    runs-on: macos-15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          filter: tree:0
+          submodules: recursive
+
+      - uses: maxim-lobanov/setup-xcode@7f352e61cbe8130c957c3bc898c4fb025784ea1e
+        with:
+          xcode-version: 26.3
+
+      - name: setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      - name: Install Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.12
+      
+      - name: install jq
+        run: brew install jq
+      
+      - name: Enable CorePack
+        run: |
+          corepack enable 
+          yarn config get globalFolder # the yarn command will ensure the correct yarn version is downloaded and installed
+
+      - name: Install NativeScript
+        run: |
+          python3 -m pip install --upgrade pip six
+          npm i -g @akylas/nativescript-cli --ignore-scripts --legacy-peer-deps
+          ns package-manager set yarn2
+          ns usage-reporting disable
+          ns error-reporting disable
+
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn config get globalFolder)"
+
+      - uses: actions/cache@v4
+        name: Handle Gem Cache
+        id: gem-cache # use this to check for `cache-hit` (`steps.gem-cache.outputs.cache-hit != 'true'`)
+        with:
+          path: vendor
+          key: ${{ runner.os }}-gem-vendor-${{ hashFiles('**/Gemfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-gem-
+
+      - name: install gems
+        if: steps.gem-cache.outputs.cache-hit != 'true'
+        run: bundle install
+
+      - name: Remove package.json resolutions
+        run: echo "`jq 'delpaths([["resolutions"]])' package.json`" > package.json
+
+      # - name: Remove yarn.lock to ensure we dont rely on it
+      #   run: rm yarn.lock
+
+      - uses: actions/cache@v4
+        name: Handle node_modules Cache
+        id: node_modules # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+        with:
+          path: node_modules
+          key: ${{ runner.os }}node_modules-${{ hashFiles('**/package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node_modules-
+
+      - name: Install deps
+        uses: bahmutov/npm-install@v1
+        with:
+          useLockFile: false
+          install-command: yarn install --silent
+        env: 
+          YARN_ENABLE_IMMUTABLE_INSTALLS: false
+      
+      - uses: oNaiPs/secrets-to-env-action@v1
+        with:
+          secrets: ${{ toJSON(secrets) }}
+
+      - name: Load .env file
+        uses: xom9ikk/dotenv@v2.3.0
+        with:
+          mode: ci
+          load-mode: strict
+
+      - name: Generate flavor ci file name
+        id: define_flavor_ci_string
+        run: |
+          echo "FLAVOR_CI_FILENAME=.env.ci.${{ inputs.flavor }}" >> $GITHUB_ENV
+          echo "FLAVOR_CI_MODE=ci.${{ inputs.flavor }}" >> $GITHUB_ENV
+
+      - name: Load flavor .env file
+        uses: xom9ikk/dotenv@v2.3.0
+        if: ${{ hashFiles(env.FLAVOR_CI_FILENAME) != '' }}
+        with:
+          mode: ${{ env.FLAVOR_CI_MODE }}
+          load-mode: strict
+      
+      - name: get Version
+        id: get_version
+        run: |
+          npx get-version ios version
+          echo "VERSION_STR=$(npx get-version ios version)"  > $GITHUB_ENV
+
+      - name: Run shell prepare script
+        if: ${{ hashFiles('scripts/ci.prepare.sh') != '' }}
+        run: |
+          sh scripts/ci.prepare.sh --platform ios --flavor "${{ inputs.flavor }}" --version "${{ env.VERSION_STR }}"
+
+      - name: publish
+        run: |
+          ns typings ios
+      
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.APP_ID }}.ios.${{ env.VERSION_STR }}.typings
+          path: |
+            typings
+          retention-days: 7
+          if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
