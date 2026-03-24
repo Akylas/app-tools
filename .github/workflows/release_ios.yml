@@ -31,6 +31,8 @@ on:
 
 jobs:
   release:
+    permissions:
+      contents: write
     runs-on: macos-15
     steps:
       - name: Checkout repository
