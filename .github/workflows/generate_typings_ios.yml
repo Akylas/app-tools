@@ -10,7 +10,7 @@ on:
         type: string
 
 jobs:
-  release:
+  typings:
     permissions:
       contents: write
     runs-on: macos-15
