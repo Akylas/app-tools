@@ -43,6 +43,7 @@ declare namespace svelteNative.JSX {
         rippleColor?: string | Color;
         sharedTransitionTag?: string;
         verticalAlignment?: string;
+        testID?: string;
         dynamicElevationOffset?: string | number;
         elevation?: string | number;
         'on:closingModally'?: (args: ShownModallyData) => void;

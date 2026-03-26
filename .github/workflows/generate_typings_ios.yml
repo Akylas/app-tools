@@ -4,33 +4,13 @@ on:
   workflow_call:
     # Introduced 'inputs' to define parameters that can be passed when calling this workflow
     inputs:
-      release_type:
-        description: "Release type"
-        required: true
-        type: string
-        default: patch
       flavor:
         description: "App flavor"
         required: false
         type: string
-      publish:
-        description: "Should we publish?"
-        default: 'true'
-        required: false
-        type: string
-      github:
-        description: "Should we publish on Github?"
-        default: 'true'
-        required: false
-        type: string
-      sentry:
-        description: "Should we use sentry?"
-        default: 'true'
-        required: false
-        type: string
 
 jobs:
-  release:
+  typings:
     permissions:
       contents: write
     runs-on: macos-15
@@ -45,17 +25,6 @@ jobs:
       - uses: maxim-lobanov/setup-xcode@7f352e61cbe8130c957c3bc898c4fb025784ea1e
         with:
           xcode-version: 26.3
-
-      - uses: oleksiyrudenko/gha-git-credentials@v2-latest
-        with:
-          token: '${{ secrets.GITHUB_TOKEN }}'
-          actor: farfromrefug
-          name: Martin Guillon
-          email: dev@akylas.fr
-      
-      - name: Git config
-        run: |
-          git config pull.rebase false
 
       - name: setup node
         uses: actions/setup-node@v4
@@ -146,12 +115,9 @@ jobs:
           mode: ${{ env.FLAVOR_CI_MODE }}
           load-mode: strict
       
-      - name: update Version
-        id: update_version
-        if: inputs.release_type != 'none'
+      - name: get Version
+        id: get_version
         run: |
-          echo "change version to ${{ inputs.release_type }}"
-          npx set-version ios ${{ inputs.release_type }}
           npx get-version ios version
           echo "VERSION_STR=$(npx get-version ios version)"  > $GITHUB_ENV
 
@@ -162,16 +128,12 @@ jobs:
 
       - name: publish
         run: |
-          bundle exec fastlane ios alpha create_tag:${{ inputs.publish }} publish:${{ inputs.publish }} sentry:${{ inputs.sentry }} github:${{ inputs.github }}
-        env:
-          # provide both names: some fastlane plugins expect GITHUB_API_TOKEN, others use GITHUB_TOKEN
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          bundle exec fastlane run_sh command:"ns typings ios" 
       
       - uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.APP_ID }}.ios.${{ env.VERSION_STR }}
+          name: ${{ env.APP_ID }}.ios.${{ env.VERSION_STR }}.typings
           path: |
-            dist/*.ipa
+            typings
           retention-days: 7
           if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`

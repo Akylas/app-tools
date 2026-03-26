@@ -1,4 +1,5 @@
 <svelte:options accessors />
+
 <script lang="ts">
     export let icon: string = null;
     export let title: string = null;
