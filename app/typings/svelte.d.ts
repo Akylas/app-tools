@@ -189,6 +189,7 @@ declare namespace svelteNative.JSX {
         floating?: boolean | string;
         variant?: string;
         error?: string;
+        lineBreak?: string;
         placeholder?: string;
         placeholderColor?: string | Color;
         'on:returnPress'?: (args) => void;
