@@ -78,6 +78,9 @@ declare namespace svelteNative.JSX {
         fadeDuration?: number;
         contextOptions?: any;
         'on:rotateAnimated'?: (args) => void;
+        'on:finalImageSet'?: (args) => void;
+        'on:fetchingFrom'?: (args) => void;
+        'on:failure'?: (args) => void;
     }
 
     interface CollectionViewAttributes extends ViewAttributes, TViewAttributes {
