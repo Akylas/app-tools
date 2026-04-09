@@ -175,3 +175,9 @@ jobs:
             dist/*.ipa
           retention-days: 7
           if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+      
+      - name: Attest
+        uses: actions/attest@v4
+        with:
+          subject-path: |
+            dist/*.ipa
