@@ -14,7 +14,7 @@
     import ListItemAutoSize from '@shared/components/ListItemAutoSize.svelte';
     import { onDestroy } from 'svelte';
     import { lc } from '~/helpers/locale';
-    import { colors, fontScale } from '~/variables';
+    import { colors, fontScale, fonts } from '~/variables';
 
     export interface IListItem {
         showBottomLine?: boolean;
@@ -348,10 +348,10 @@
                     <label
                         col={0}
                         color={item.iconColor || colorOnSurface}
-                        fontFamily="app"
+                        fontFamily={item.iconFontFamily || $fonts.mdi}
                         fontSize={(item.iconFontSize || iconFontSize) * $fontScale}
                         paddingLeft="8"
-                        text="app-webdav"
+                        text={item.icon}
                         verticalAlignment="center"
                         width={iconFontSize * 2} />
                 </svelte:component>
