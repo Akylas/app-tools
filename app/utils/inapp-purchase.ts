@@ -74,7 +74,7 @@ async function showThankYou() {
 }
 
 export async function presentInAppSponsorBottomsheet() {
-    const OptionSelect = (await import('~/components/common/OptionSelect.svelte')).default;
+    const OptionSelect = (await import('@shared/components/OptionSelect.svelte')).default;
     const options = inappItems
         .sort((a, b) => a.priceAmount - b.priceAmount)
         .map((i) => {
