@@ -75,6 +75,7 @@ declare namespace svelteNative.JSX {
         imageRotation?: number;
         colorMatrix?: number[];
         blurRadius?: number;
+        noRatioEnforce?: boolean;
         fadeDuration?: number;
         contextOptions?: any;
         'on:rotateAnimated'?: (args) => void;
