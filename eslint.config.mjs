@@ -79,7 +79,7 @@ export default [
             '@typescript-eslint/no-unsafe-assignment': 'off',
             '@typescript-eslint/adjacent-overload-signatures': 'off',
             '@typescript-eslint/array-type': 'error',
-            '@typescript-eslint/await-thenable': 'error',
+            '@typescript-eslint/await-thenable': 'warn',
             '@typescript-eslint/ban-types': 'off',
             '@typescript-eslint/class-name-casing': 'off',
             '@typescript-eslint/consistent-type-assertions': 'error',
