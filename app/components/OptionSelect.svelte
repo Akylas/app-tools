@@ -4,6 +4,7 @@
     import { Template } from '@nativescript-community/svelte-native/components';
     import { Canvas, CanvasView } from '@nativescript-community/ui-canvas';
     import { CheckBox } from '@nativescript-community/ui-checkbox';
+    import { CollectionView } from '@nativescript-community/ui-collectionview';
     import { openFilePicker } from '@nativescript-community/ui-document-picker';
     import { closeBottomSheet } from '@nativescript-community/ui-material-bottomsheet/svelte';
     import { TextField } from '@nativescript-community/ui-material-textfield';
@@ -13,6 +14,7 @@
     import ListItem from '@shared/components/ListItem.svelte';
     import ListItemAutoSize from '@shared/components/ListItemAutoSize.svelte';
     import { onDestroy } from 'svelte';
+    import { NativeViewElementNode } from 'svelte-native/dom';
     import { lc } from '~/helpers/locale';
     import { colors, fontScale, fonts } from '~/variables';
 
@@ -37,6 +39,7 @@
         [k: string]: any;
     }
     export interface OptionType extends IListItem {
+        group?: string;
         isPick?: boolean;
         boxType?: string;
         type?: string;
@@ -81,6 +84,7 @@
 
     export let component = autoSizeListItem ? ListItemAutoSize : ListItem;
     let filteredOptions: OptionType[] | ObservableArray<OptionType> = null;
+    let collectionView: NativeViewElementNode<CollectionView>;
     let filter: string = null;
 
     // technique for only specific properties to get updated on store change
@@ -140,6 +144,10 @@
             close(item);
         }
     }
+    function getCheckbox(index: number) {
+        const view = collectionView?.nativeView?.getViewForItemAtIndex(index);
+        return view?.getViewById<CheckBox>('checkbox');
+    }
     let ignoreNextOnCheckBoxChange = false;
     function onCheckedChanged(item, event) {
         // DEV_LOG && console.log('onCheckedChanged', event.value, ignoreNextOnCheckBoxChange);
@@ -149,7 +157,29 @@
             return;
         }
         ignoreNextOnCheckBoxChange = true;
-        if (onlyOneSelected && options instanceof ObservableArray) {
+        if (item.group && options instanceof ObservableArray) {
+            if (event.value) {
+                item.value = true;
+                options.setItem(options.indexOf(item), item);
+                options.forEach((opt, index) => {
+                    if (item !== opt && opt.group === item.group && opt.value === true) {
+                        opt.value = false;
+                        options.setItem(index, opt);
+
+                        if (__IOS__) {
+                            // dirty hack for now
+                            getCheckbox(index).checked = false;
+                        }
+                    }
+                });
+            } else {
+                // we dont allow to have none selected
+                ignoreNextOnCheckBoxChange = false;
+                const checkboxView: CheckBox = ((event.object as View).parent as View).getViewById('checkbox');
+                checkboxView.checked = true;
+                return;
+            }
+        } else if (onlyOneSelected && options instanceof ObservableArray) {
             if (event.value) {
                 const oldSelected = currentlyCheckedItem;
                 if (oldSelected === item) {
@@ -255,6 +285,7 @@
             </gridlayout>
         {/if}
         <collectionView
+            bind:this={collectionView}
             {autoSize}
             {estimatedItemSize}
             {isScrollEnabled}
