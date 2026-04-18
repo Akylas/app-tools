@@ -14,7 +14,7 @@
     import ListItem from '@shared/components/ListItem.svelte';
     import ListItemAutoSize from '@shared/components/ListItemAutoSize.svelte';
     import { onDestroy } from 'svelte';
-    import { NativeViewElementNode } from 'svelte-native/dom';
+    import { NativeViewElementNode } from '@nativescript-community/svelte-native/dom';
     import { lc } from '~/helpers/locale';
     import { colors, fontScale, fonts } from '~/variables';
 
