@@ -216,8 +216,8 @@ jobs:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
           KEYSTORE_PATH: ${{ secrets.KEYSTORE_PATH }}
         run: |
-          echo "KEYSTORE_PATH: $KEYSTORE_PATH"
-          echo "KEYSTORE_BASE64: $KEYSTORE_BASE64"
+          echo "KEYSTORE_PATH: '$KEYSTORE_PATH'"
+          echo "KEYSTORE_BASE64: '$KEYSTORE_BASE64'"
           mkdir -p "$(dirname "$KEYSTORE_PATH")"
           echo $KEYSTORE_BASE64 | base64 -d > $KEYSTORE_PATH
 
