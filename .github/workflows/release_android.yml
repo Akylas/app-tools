@@ -173,17 +173,7 @@ jobs:
           install-command: yarn install --silent
         env: 
           YARN_ENABLE_IMMUTABLE_INSTALLS: false
-      
-      - name: Test secrets
-        run: |
-          echo "secret: ${{ secrets.SENTRY_DSN }}"
-      - name: Check secret presence
-        run: |
-          if [ -z "${{ secrets.SENTRY_DSN }}" ]; then
-            echo "SECRET IS EMPTY"
-          else
-            echo "SECRET IS SET"
-          fi
+
       - uses: oNaiPs/secrets-to-env-action@v1
         with:
           secrets: ${{ toJSON(secrets) }}
