@@ -74,6 +74,7 @@
 </gridlayout> -->
 
 <canvasview
+    accessibilityHidden={true}
     {columns}
     padding="0 16 0 16"
     rippleColor={color || colorPrimary}

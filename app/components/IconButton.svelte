@@ -89,6 +89,7 @@
 {#if __ANDROID__}
     <canvasview
         bind:this={canvas}
+        accessibilityLabel={tooltip}
         borderRadius={shape === 'round' || (rounded && !shape) ? (height || size) / 2 : 10}
         disableCss={true}
         height={height || size}
@@ -114,6 +115,7 @@
         variant="text"
         visibility={isVisible ? 'visible' : isHidden ? 'hidden' : 'collapse'}
         {...$$restProps}
+        accessibilityLabel={tooltip}
         fontSize={fontSize ? fontSize : small ? 16 : 24}
         height={height || size}
         width={width || size}
