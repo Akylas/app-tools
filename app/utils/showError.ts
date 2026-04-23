@@ -14,9 +14,10 @@ export async function showError(
     {
         alertOptions = {},
         forcedMessage,
+        reportError = true,
         showAsSnack = false,
         silent = false
-    }: { showAsSnack?: boolean; forcedMessage?: string; alertOptions?: AlertOptions & MDCAlertControlerOptions; silent?: boolean } = {}
+    }: { showAsSnack?: boolean; reportError?: boolean; forcedMessage?: string; alertOptions?: AlertOptions & MDCAlertControlerOptions; silent?: boolean } = {}
 ) {
     try {
         if (!err) {
@@ -41,7 +42,7 @@ export async function showError(
         // const showSendBugReport = reporterEnabled && !isString && !(realError instanceof HTTPError) && !!realError.stack;
         const title = realError?.['title'] || lc('error');
 
-        if (SENTRY_ENABLED && realError && reporterEnabled && realError.customErrorConstructorName !== 'PermissionError' && realError.customErrorConstructorName !== 'SilentError') {
+        if (SENTRY_ENABLEDr && reporterEnabled && reportError && realErro && realError.customErrorConstructorName !== 'PermissionError' && realError.customErrorConstructorName !== 'SilentError') {
             try {
                 if (realError instanceof CustomError) {
                     Sentry.withScope((scope) => {
