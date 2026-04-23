@@ -3,6 +3,7 @@ import DatabaseInterface from 'kiss-orm/dist/Databases/DatabaseInterface';
 import migrate from 'kiss-orm/dist/Databases/Common/migrate';
 import { SQLiteDatabase, openOrCreate, wrapDb } from '@nativescript-community/sqlite';
 import { NoSpaceLeftError } from '@akylas/nativescript-app-utils/error';
+import { DatabaseOptions } from '@nativescript-community/sqlite/sqlite.common';
 
 function formatIdentifier(i: string): string {
     return i;
@@ -10,13 +11,7 @@ function formatIdentifier(i: string): string {
 
 export default class NSQLDatabase implements DatabaseInterface {
     db: SQLiteDatabase;
-    constructor(
-        filePathOrDb: any,
-        options?: {
-            threading?: boolean;
-            flags?: number;
-        }
-    ) {
+    constructor(filePathOrDb: any, options?: DatabaseOptions) {
         if (typeof filePathOrDb === 'string') {
             this.db = openOrCreate(filePathOrDb, options);
         } else {
