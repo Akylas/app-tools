@@ -1,9 +1,12 @@
-<script lang="ts">
+<script context="module" lang="ts">
     import { Canvas, CanvasView } from '@nativescript-community/ui-canvas';
-    import { createEventDispatcher } from '@shared/utils/svelte/ui';
+    import { conditionalEvent } from '@shared/utils/svelte/ui';
     import { colors, fontScale, fonts } from '~/variables';
+    import { IListItem } from './OptionSelect.svelte';
+</script>
+
+<script lang="ts">
     $: ({ colorOnSurface, colorOnSurfaceVariant, colorOutlineVariant, colorPrimary } = $colors);
-    const dispatch = createEventDispatcher();
     // technique for only specific properties to get updated on store change
     export let showBottomLine: boolean = false;
     export let extraPaddingLeft: number = 0;
@@ -11,25 +14,43 @@
     export let fontSize: number = 17;
     export let fontWeight: string | number = 500;
     export let subtitleFontSize: number = 14;
-    export let title: string = null;
-    export let subtitle: string = null;
-    export let leftIcon: string = null;
     export let columns: string = '*';
     export let mainCol = 0;
+    export let onLongPress: (item, e) => void = null;
     export let leftIconFonFamily: string = $fonts.mdi;
-    export let color: string = colorOnSurface;
-    export let subtitleColor: string = null;
+    export let color: string | Color = colorOnSurface;
+    export let subtitleColor: string | Color = null;
+    export let item: IListItem;
     export let onDraw: (event: { canvas: Canvas; object: CanvasView }) => void = null;
+
+    $: itemColor = typeof item.color === 'function' ? item['color'](item) : item.color;
 </script>
 
-<canvasview {columns} padding="0 16 0 16" rippleColor={colorPrimary} on:tap={(event) => dispatch('tap', event)} {...$$restProps}>
-    <canvaslabel col={mainCol} color={color || colorOnSurface} on:draw={onDraw}>
-        <cgroup paddingBottom={subtitle ? 10 : 0} verticalAlignment="middle">
-            <cspan fontFamily={leftIconFonFamily} fontSize={iconFontSize * $fontScale} paddingLeft="10" text={leftIcon} visibility={leftIcon ? 'visible' : 'hidden'} width={iconFontSize * 2} />
+<canvasview
+    {columns}
+    padding="0 16 0 16"
+    rippleColor={colorPrimary}
+    on:tap
+    use:conditionalEvent={{ condition: !!(item.onLongPress || onLongPress), event: 'longPress', callback: item.onLongPress || onLongPress }}
+    {...$$restProps}>
+    <canvaslabel col={mainCol} color={itemColor || color || colorOnSurface} on:draw={onDraw}>
+        <cgroup paddingBottom={item.subtitle ? 10 : 0} verticalAlignment="middle">
+            <cspan
+                color={item.iconColor}
+                fontFamily={item.iconFontFamily || leftIconFonFamily}
+                fontSize={(item.iconFontSize || iconFontSize) * $fontScale}
+                paddingLeft="8"
+                text={item.icon}
+                visibility={item.icon ? 'visible' : 'hidden'}
+                width={iconFontSize * 2} />
         </cgroup>
-        <cgroup paddingLeft={(leftIcon ? iconFontSize * 2 : 0) + extraPaddingLeft} textAlignment="left" verticalAlignment="middle">
-            <cspan fontSize={fontSize * $fontScale} {fontWeight} text={title} />
-            <cspan color={subtitleColor || colorOnSurfaceVariant} fontSize={subtitleFontSize * $fontScale} text={subtitle ? '\n' + subtitle : ''} visibility={subtitle ? 'visible' : 'hidden'} />
+        <cgroup paddingLeft={(item.icon ? 38 * $fontScale : 0) + extraPaddingLeft} textAlignment="left" verticalAlignment="middle">
+            <cspan fontSize={(item.fontSize || fontSize) * $fontScale} {fontWeight} text={item.title || item.name} />
+            <cspan
+                color={item.subtitleColor || subtitleColor || colorOnSurfaceVariant}
+                fontSize={(item.subtitleFontSize || subtitleFontSize) * $fontScale}
+                text={item.subtitle ? '\n' + item.subtitle : ''}
+                visibility={item.subtitle ? 'visible' : 'hidden'} />
         </cgroup>
     </canvaslabel>
     <slot />
