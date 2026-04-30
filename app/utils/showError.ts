@@ -14,9 +14,10 @@ export async function showError(
     {
         alertOptions = {},
         forcedMessage,
+        reportError = true,
         showAsSnack = false,
         silent = false
-    }: { showAsSnack?: boolean; forcedMessage?: string; alertOptions?: AlertOptions & MDCAlertControlerOptions; silent?: boolean } = {}
+    }: { showAsSnack?: boolean; reportError?: boolean; forcedMessage?: string; alertOptions?: AlertOptions & MDCAlertControlerOptions; silent?: boolean } = {}
 ) {
     try {
         if (!err) {

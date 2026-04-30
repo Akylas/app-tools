@@ -51,6 +51,8 @@ on:
 
 jobs:
   release:
+    permissions:
+      contents: write
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout repository
@@ -171,7 +173,7 @@ jobs:
           install-command: yarn install --silent
         env: 
           YARN_ENABLE_IMMUTABLE_INSTALLS: false
-      
+
       - uses: oNaiPs/secrets-to-env-action@v1
         with:
           secrets: ${{ toJSON(secrets) }}

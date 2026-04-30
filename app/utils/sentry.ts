@@ -9,7 +9,42 @@ export let isSentryEnabled = false;
 export async function startSentry() {
     try {
         if (SENTRY_ENABLED) {
-            Sentry = await import('@nativescript-community/sentry');
+            if (!Sentry) {
+                Sentry = await import('@nativescript-community/sentry');
+                install();
+                const errorHandler: TraceErrorHandler = {
+                    handlerError(err) {
+                        Sentry.captureException(err);
+                    }
+                };
+                Application.on(Application.uncaughtErrorEvent, (event) => {
+                    Sentry.captureException(event.error);
+                });
+                Application.on(Application.discardedErrorEvent, (event) => {
+                    Sentry.captureException(event.error);
+                });
+                Trace.setErrorHandler(errorHandler);
+                isSentryEnabled = true;
+
+                function createNavigatioTransaction(object, isBackNavigation, customMessage?: string) {
+                    Sentry.addBreadcrumb({
+                        category: 'navigation',
+                        type: 'navigation',
+                        // We assume that context.name is the name of the route.
+                        message: customMessage ? customMessage + ` ${object}` : `Navigation to ${object}`,
+                        data: {
+                            isBackNavigation,
+                            // from: `${(event.object as Page).frame?.currentPage}`,
+                            to: `${object}`
+                        }
+                    });
+                }
+                Page.on('navigatingTo', (event: NavigatedData) => createNavigatioTransaction(event.object, event.isBackNavigation));
+                Page.on('showingModally', (event: NavigatedData) => createNavigatioTransaction(event.object, false, 'Navigation to Modal'));
+                Page.on('closingModally', (event: NavigatedData) => createNavigatioTransaction(event.object, true, 'Closing modal'));
+                GestureRootView.on('shownInBottomSheet', (event: NavigatedData) => createNavigatioTransaction(event.object, false, 'Opening BottomSheet'));
+                GestureRootView.on('closedBottomSheet', (event: NavigatedData) => createNavigatioTransaction(event.object, true, 'Closing BottomSheet'));
+            }
             Sentry.init({
                 debug: DEV_LOG,
                 dsn: SENTRY_DSN,
@@ -29,51 +64,25 @@ export async function startSentry() {
                 enableAutoFragmentLifecycleTracing: false,
                 enableAppLifecycleBreadcrumbs: false
             });
-            install();
-            const errorHandler: TraceErrorHandler = {
-                handlerError(err) {
-                    Sentry.captureException(err);
-                }
-            };
-            Application.on(Application.uncaughtErrorEvent, (event) => {
-                Sentry.captureException(event.error);
-            });
-            Application.on(Application.discardedErrorEvent, (event) => {
-                Sentry.captureException(event.error);
-            });
-            Trace.setErrorHandler(errorHandler);
-            isSentryEnabled = true;
-
-            function createNavigatioTransaction(object, isBackNavigation, customMessage?: string) {
-                Sentry.addBreadcrumb({
-                    category: 'navigation',
-                    type: 'navigation',
-                    // We assume that context.name is the name of the route.
-                    message: customMessage ? customMessage + ` ${object}` : `Navigation to ${object}`,
-                    data: {
-                        isBackNavigation,
-                        // from: `${(event.object as Page).frame?.currentPage}`,
-                        to: `${object}`
-                    }
-                });
-            }
-            Page.on('navigatingTo', (event: NavigatedData) => createNavigatioTransaction(event.object, event.isBackNavigation));
-            Page.on('showingModally', (event: NavigatedData) => createNavigatioTransaction(event.object, false, 'Navigation to Modal'));
-            Page.on('closingModally', (event: NavigatedData) => createNavigatioTransaction(event.object, true, 'Closing modal'));
-            GestureRootView.on('shownInBottomSheet', (event: NavigatedData) => createNavigatioTransaction(event.object, false, 'Opening BottomSheet'));
-            GestureRootView.on('closedBottomSheet', (event: NavigatedData) => createNavigatioTransaction(event.object, true, 'Closing BottomSheet'));
         }
     } catch (err) {
         console.error('startSentry', err, err['stack']);
     }
 }
+export async function stopSentry() {
+    if (SENTRY_ENABLED && Sentry) {
+        Sentry.close();
+    }
+}
 
 export function setSentryExtra(key: string, value: any) {
-    Sentry?.setExtra(key, value);
+    if (SENTRY_ENABLED) {
+        Sentry?.setExtra(key, value);
+    }
 }
 
 export function withSentryScope(callback: (scope: SentryType.Scope) => void) {
-    if (Sentry) {
+    if (SENTRY_ENABLED && Sentry) {
         return Sentry.withScope(callback);
     }
 }

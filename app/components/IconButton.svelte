@@ -6,6 +6,7 @@
     import { actionBarButtonHeight, colors, fonts } from '~/variables';
 
     const iconPaints: { [k: string]: Paint } = {};
+    const subtitlePaint = new Paint();
 </script>
 
 <script lang="ts">
@@ -19,12 +20,14 @@
     export let gray = false;
     export let isSelected = false;
     export let text = null;
+    export let subtitle = null;
     export let fontFamily = $fonts.mdi;
     export let selectedColor = white ? 'white' : undefined;
     export let color = null;
     export let onLongPress: Function = null;
     export let fontSize = 0;
-    export let size: any = small ? 30 : $actionBarButtonHeight;
+    export let subtitleFontSize = null;
+    export let size: any = subtitle ? (small ? 40 : $actionBarButtonHeight + 20) : small ? 30 : $actionBarButtonHeight;
     export let tooltip = null;
     export let rounded = true;
     export let shape = null;
@@ -39,9 +42,6 @@
     $: actualLongPress =
         onLongPress || tooltip
             ? (event) => {
-                //   if (event.ios && event.ios.state !== 3) {
-                //       return;
-                //   }
                   if (onLongPress) {
                       onLongPress(event);
                   } else {
@@ -67,25 +67,38 @@
         const w = canvas.getWidth();
         const w2 = w / 2;
         const h2 = canvas.getHeight() / 2;
-        const staticLayout = new StaticLayout(text, iconPaint, w, LayoutAlignment.ALIGN_CENTER, 1, 0, true);
-        canvas.translate(0, h2 - staticLayout.getHeight() / 2);
-        staticLayout.draw(canvas);
-        // canvas.drawText(text, w2, w2+ textSize/3, iconPaint);
+        let staticLayout = new StaticLayout(text, iconPaint, w, LayoutAlignment.ALIGN_CENTER, 1, 0, true);
+        if (subtitle) {
+            const iconHeight = staticLayout.getHeight();
+            canvas.translate(0, h2 - iconHeight);
+            staticLayout.draw(canvas);
+
+            subtitlePaint.color = isEnabled ? actualColor : 'lightgray';
+            subtitlePaint.textSize = subtitleFontSize || (small ? 10 : 12);
+            staticLayout = new StaticLayout(subtitle, subtitlePaint, w, LayoutAlignment.ALIGN_CENTER, 1, 0, true);
+            canvas.translate(0, iconHeight);
+            // canvas.drawText(subtitle, w2, h2, subtitlePaint);
+            staticLayout.draw(canvas);
+        } else {
+            canvas.translate(0, h2 - staticLayout.getHeight() / 2);
+            staticLayout.draw(canvas);
+        }
     }
 </script>
 
 {#if __ANDROID__}
     <canvasview
         bind:this={canvas}
-        borderRadius={shape === 'round' || (rounded && !shape) ? (height || size) / 2 : null}
+        accessibilityLabel={tooltip}
+        borderRadius={shape === 'round' || (rounded && !shape) ? (height || size) / 2 : 10}
         disableCss={true}
+        height={height || size}
         isUserInteractionEnabled={isEnabled}
         rippleColor={actualColor}
         visibility={isVisible ? 'visible' : isHidden ? 'hidden' : 'collapse'}
-        on:draw={onCanvasDraw}
-        {...$$restProps}
-        height={height || size}
         width={width || size}
+        {...$$restProps}
+        on:draw={onCanvasDraw}
         on:tap
         use:conditionalEvent={{ condition: !!actualLongPress, event: 'longPress', callback: actualLongPress }} />
 {:else}
@@ -94,6 +107,7 @@
         disableCss={true}
         {fontFamily}
         {isEnabled}
+        isUserInteractionEnabled={isEnabled}
         padding={0}
         rippleColor={actualColor}
         shape={shape || (rounded ? 'round' : null)}
@@ -101,10 +115,11 @@
         variant="text"
         visibility={isVisible ? 'visible' : isHidden ? 'hidden' : 'collapse'}
         {...$$restProps}
+        accessibilityLabel={tooltip}
         fontSize={fontSize ? fontSize : small ? 16 : 24}
         height={height || size}
         width={width || size}
         on:tap
         on:longPress={actualLongPress}
-        use:conditionalEvent={{ condition: !!actualLongPress, event: 'longPress', callback: actualLongPress }} /> --> />
+        use:conditionalEvent={{ condition: !!actualLongPress, event: 'longPress', callback: actualLongPress }} />
 {/if}

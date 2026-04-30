@@ -109,7 +109,7 @@ export function updateLoadingProgress(msg: Partial<ShowLoadingOptions>) {
 export async function showLoading(msg?: string | ShowLoadingOptions) {
     try {
         const text = (msg as any)?.text || (typeof msg === 'string' && msg) || lc('loading');
-    // DEV_LOG && console.log('showLoading', text);
+        // DEV_LOG && console.log('showLoading', text);
         const indicator = getLoadingIndicator();
         indicator.instance.onButtonTap = msg?.['onButtonTap'];
         const props = {
@@ -203,4 +203,37 @@ export async function showAlertOptionSelect(props?: ComponentProps<OptionSelect_
         componentInstanceInfo.viewInstance.$destroy();
         componentInstanceInfo = null;
     }
+}
+
+export async function showAlertDialog<T>(viewSpec: typeof SvelteComponent<T>, props?: T, options?: Partial<AlertOptions & MDCAlertControlerOptions>) {
+    let componentInstanceInfo: ComponentInstanceInfo<GridLayout, SvelteComponent<T>>;
+    // try {
+    componentInstanceInfo = resolveComponentElement(viewSpec, {
+        onClose: (result) => {
+            view.bindingContext.closeCallback(result);
+        },
+        onCheckBox(item, value, e) {
+            view.bindingContext.closeCallback(item);
+        },
+        ...props
+    }) as ComponentInstanceInfo<GridLayout, SvelteComponent<T>>;
+    const view: View = componentInstanceInfo.element.nativeView;
+    const dialog = new AlertDialog({
+        view,
+        ...(options ? options : {})
+    });
+    dialog.show(() => {
+        DEV_LOG && console.log('on reslove');
+        componentInstanceInfo.element.nativeElement._tearDownUI();
+        componentInstanceInfo.viewInstance.$destroy();
+        componentInstanceInfo = null;
+    });
+    // return result;
+    // } catch (err) {
+    // throw err;
+    // } finally {
+    //     componentInstanceInfo.element.nativeElement._tearDownUI();
+    //     componentInstanceInfo.viewInstance.$destroy();
+    //     componentInstanceInfo = null;
+    // }
 }

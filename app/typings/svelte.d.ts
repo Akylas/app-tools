@@ -75,9 +75,13 @@ declare namespace svelteNative.JSX {
         imageRotation?: number;
         colorMatrix?: number[];
         blurRadius?: number;
+        noRatioEnforce?: boolean;
         fadeDuration?: number;
         contextOptions?: any;
         'on:rotateAnimated'?: (args) => void;
+        'on:finalImageSet'?: (args) => void;
+        'on:fetchingFrom'?: (args) => void;
+        'on:failure'?: (args) => void;
     }
 
     interface CollectionViewAttributes extends ViewAttributes, TViewAttributes {
@@ -190,6 +194,7 @@ declare namespace svelteNative.JSX {
         floating?: boolean | string;
         variant?: string;
         error?: string;
+        lineBreak?: string;
         placeholder?: string;
         placeholderColor?: string | Color;
         'on:returnPress'?: (args) => void;

@@ -48,7 +48,8 @@ export const colors = writable({
     popupMenuBackground: ''
 });
 export const fonts = writable({
-    mdi: ''
+    mdi: '',
+    app: ''
 });
 export const windowInset = writable({ top: 0, left: 0, right: 0, bottom: 0 });
 export const actionBarButtonHeight = writable(0);
@@ -268,7 +269,7 @@ export const onInitRootView = function (force = false) {
         if (!rootViewStyle) {
             return;
         }
-        fonts.set({ mdi: rootViewStyle.getCssVariable('--mdiFontFamily') });
+        fonts.set({ mdi: rootViewStyle.getCssVariable('--mdiFontFamily'), app: rootViewStyle.getCssVariable('--appFontFamily') });
         actionBarHeight.set(parseFloat(rootViewStyle.getCssVariable('--actionBarHeight')));
         actionBarButtonHeight.set(parseFloat(rootViewStyle.getCssVariable('--actionBarButtonHeight')));
         const context = Utils.android.getApplicationContext();
@@ -300,7 +301,7 @@ export const onInitRootView = function (force = false) {
             return;
         }
         initRootViewCalled = !!rootView;
-        fonts.set({ mdi: rootViewStyle.getCssVariable('--mdiFontFamily') });
+        fonts.set({ mdi: rootViewStyle.getCssVariable('--mdiFontFamily'), app: rootViewStyle.getCssVariable('--appFontFamily') });
 
         const currentColors = get(colors);
         Object.keys(currentColors).forEach((c) => {

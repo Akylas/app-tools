@@ -1,9 +1,8 @@
 <script context="module" lang="ts">
     import { Canvas, CanvasView, Paint } from '@nativescript-community/ui-canvas';
-    import { createEventDispatcher } from '@shared/utils/svelte/ui';
+    import { conditionalEvent, createEventDispatcher } from '@shared/utils/svelte/ui';
     import { colors, fontScale } from '~/variables';
-    const iconPaint = new Paint();
-    // iconPaint.setTextAlign(Align.CENTER);
+    import type { IListItem } from './OptionSelect.svelte';
     const linePaint = new Paint();
     linePaint.strokeWidth = 1;
 </script>
@@ -11,36 +10,30 @@
 <script lang="ts">
     const dispatch = createEventDispatcher();
     // technique for only specific properties to get updated on store change
-    let { colorOnSurface, colorOnSurfaceDisabled, colorOnSurfaceVariant, colorOutlineVariant, colorPrimary } = $colors;
-    $: ({ colorOnSurface, colorOnSurfaceDisabled, colorOnSurfaceVariant, colorOutlineVariant, colorPrimary } = $colors);
+    let { colorOnSurface, colorOnSurfaceVariant, colorOutlineVariant, colorPrimary } = $colors;
+    $: ({ colorOnSurface, colorOnSurfaceVariant, colorOutlineVariant, colorPrimary } = $colors);
 
     $: linePaint.color = colorOutlineVariant;
+
+    $: color = typeof item.color === 'function' ? item['color'](item) : item.color;
     export let showBottomLine: boolean = false;
     // export let iconFontSize: number = 24;
-    export let fontSize: number = 20;
-    export let useExtraPadding: boolean = true;
+    export let item: IListItem;
+    export let fontSize: number = 21;
     export let fontWeight: any = 'normal';
-    export let subtitleFontSize: number = 14;
-    export let title: string = null;
-    export let titleColor: string = null;
-    export let color: string = null;
-    export let subtitleColor: string = null;
-    export let subtitle: string = null;
-    // export let leftIcon: string = null;
-    export let rightValue: string | Function = null;
-    export let titleProps = {};
-    // const leftColumn = iconFontSize * 1.4 * $fontScale;
+    export let subtitleFontSize: number = 15;
     export let columns: string = '*,auto';
-    // export let leftIconFonFamily: string = $fonts.mdi;
     export let mainCol = 0;
-    export let onDraw: (event: { canvas: Canvas; object: CanvasView }) => void = null;
+    export let onLinkTap: (event) => void = null;
+    export let onLongPress: (event) => void = null;
+    export let onDraw: (item: IListItem, event: { canvas: Canvas; object: CanvasView }) => void = null;
 
     function draw(event: { canvas: Canvas; object: CanvasView }) {
         const canvas = event.canvas;
         const h = canvas.getHeight();
         const w = canvas.getWidth();
 
-        if (showBottomLine) {
+        if (item.showBottomLine || showBottomLine) {
             event.canvas.drawLine(20, h - 1, w, h - 1, linePaint);
         }
         // if (leftIcon) {
@@ -53,10 +46,10 @@
         //     // canvas.drawRect(0,0,leftColumn,  staticLayout.getHeight(), iconPaint);
         //     staticLayout.draw(canvas);
         // }
-        onDraw?.(event);
+        (item.onDraw || onDraw)?.(item, event);
     }
 
-    $: addedPadding = useExtraPadding ? (subtitle?.length > 0 ? 6 : 10) + (__ANDROID__ ? 8 : 12) : 0;
+    $: addedPadding = (item.subtitle?.length > 0 ? 6 : 10) + (__ANDROID__ ? 8 : 12);
 </script>
 
 <!-- <gridlayout>
@@ -81,12 +74,13 @@
 </gridlayout> -->
 
 <canvasview
+    accessibilityHidden={true}
     {columns}
     padding="0 16 0 16"
-    rippleColor={color || colorOnSurface}
+    rippleColor={color || colorPrimary}
     on:tap={(event) => dispatch('tap', event)}
-    on:longPress={(event) => dispatch('longPress', event)}
     on:draw={draw}
+    use:conditionalEvent={{ condition: !!(item.onLongPress || onLongPress), event: 'longPress', callback: item.onLongPress || onLongPress }}
     {...$$restProps}>
     <!-- <label
         fontFamily={leftIconFonFamily}
@@ -96,21 +90,33 @@
         verticalAlignment="middle"
         visibility={!!leftIcon ? 'visible' : 'collapse'}
         width={iconFontSize * 2} /> -->
-    <label col={mainCol} disableCss={true} lineBreak="end" paddingBottom={addedPadding} paddingTop={addedPadding} textWrap={true} verticalAlignment="center" {...titleProps}>
-        <cspan color={titleColor || color || colorOnSurface} fontSize={fontSize * $fontScale} {fontWeight} text={title} />
-        <cspan color={subtitleColor || colorOnSurfaceVariant} fontSize={subtitleFontSize * $fontScale} text={subtitle ? '\n' + subtitle : null} />
+    <label
+        col={mainCol}
+        color={item.titleColor || color || colorOnSurface}
+        disableCss={true}
+        {fontWeight}
+        html={item.html}
+        paddingBottom={addedPadding}
+        paddingTop={addedPadding}
+        text={item.text}
+        textWrap={true}
+        verticalTextAlignment="center"
+        {...item.titleProps || $$restProps?.titleProps}
+        use:conditionalEvent={{ condition: !!(item.onLinkTap || onLinkTap), event: 'linkTap', callback: item.onLinkTap || onLinkTap }}>
+        <cspan fontSize={fontSize * $fontScale} lineHeight={fontSize * $fontScale * 1.3} text={item.title || item.name} />
+        <cspan color={item.subtitleColor || colorOnSurfaceVariant} fontSize={(item.subtitleFontSize || subtitleFontSize) * $fontScale} text={item.subtitle ? '\n' + item.subtitle : null} />
     </label>
 
     <label
         col={1}
-        color={subtitleColor}
+        color={item.subtitleColor}
         disableCss={true}
-        fontSize={subtitleFontSize * $fontScale}
+        fontSize={(item.rightValueFontSize || subtitleFontSize) * $fontScale}
         marginLeft={16}
-        text={typeof rightValue === 'function' ? rightValue() : rightValue}
+        text={typeof item.rightValue === 'function' ? item.rightValue() : item.rightValue}
         textAlignment="right"
         verticalAlignment="middle"
-        visibility={!!rightValue ? 'visible' : 'collapse'}
+        visibility={!!item.rightValue ? 'visible' : 'collapse'}
         on:tap={(event) => dispatch('rightIconTap', event)} />
     <slot />
 </canvasview>
