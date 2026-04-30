@@ -41,7 +41,15 @@ export async function showError(
         // const showSendBugReport = reporterEnabled && !isString && !(realError instanceof HTTPError) && !!realError.stack;
         const title = realError?.['title'] || lc('error');
 
-        if (SENTRY_ENABLED && realError && reporterEnabled && realError.customErrorConstructorName !== 'PermissionError' && realError.customErrorConstructorName !== 'SilentError') {
+        if (
+            SENTRY_ENABLED &&
+            reporterEnabled &&
+            reportError &&
+            realError &&
+            realError.customErrorConstructorName !== 'PermissionError' &&
+            realError.customErrorConstructorName !== 'SilentError' &&
+            realError.customErrorConstructorName !== 'HTTPError' // dont send HTTP errors for now
+        ) {
             try {
                 if (realError instanceof CustomError) {
                     Sentry.withScope((scope) => {
