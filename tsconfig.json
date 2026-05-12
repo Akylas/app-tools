@@ -21,6 +21,7 @@
         "noImplicitUseStrict": false,
         "noFallthroughCasesInSwitch": true,
         "resolveJsonModule": true,
+        "strict": false,
         "lib": ["esnext", "es2017", "dom"],
         "types": ["node", "svelte", "@nativescript-community/svelte-native"],
         "paths": {
