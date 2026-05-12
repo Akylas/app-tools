@@ -201,6 +201,9 @@ declare namespace svelteNative.JSX {
         'on:focus'?: (args) => void;
         'on:blur'?: (args) => void;
     }
+    interface SegmentedBarItemAttributes {
+        variant?: string;
+    }
     interface TextViewAttributes {
         floating?: boolean | string;
         variant?: string;
