@@ -1,4 +1,4 @@
-function chunk<T>(array: T[], size) {
+export function chunk<T>(array: T[], size) {
     return Array.from<T, T[]>({ length: Math.ceil(array.length / size) }, (value, index) => array.slice(index * size, index * size + size));
 }
 
