@@ -1,17 +1,20 @@
 import { InAppBrowser } from '@akylas/nativescript-inappbrowser';
 import { lc } from '@nativescript-community/l';
+import { NativeViewElementNode, createElement } from '@nativescript-community/svelte-native/dom';
 import { AlertDialog, MDCAlertControlerOptions, alert } from '@nativescript-community/ui-material-dialogs';
 import { SnackBarOptions, showSnack as mdShowSnack } from '@nativescript-community/ui-material-snackbar';
-import { Application, type GridLayout, Utils, type View, type ViewBase } from '@nativescript/core';
+import { HorizontalPosition, VerticalPosition } from '@nativescript-community/ui-popover';
+import { showPopover } from '@nativescript-community/ui-popover/svelte';
+import { type GridLayout, Utils, type View, type ViewBase } from '@nativescript/core';
+import { AlertOptions } from '@nativescript/core/ui/dialogs/dialogs-common';
+import { debounce } from '@nativescript/core/utils';
 import type LoadingIndicator__SvelteComponent_ from '@shared/components/LoadingIndicator.svelte';
 import LoadingIndicator from '@shared/components/LoadingIndicator.svelte';
+import type OptionSelect__SvelteComponent_ from '@shared/components/OptionSelect.svelte';
 import { showError } from '@shared/utils/showError';
 import { ComponentProps } from 'svelte';
-import { NativeViewElementNode, createElement } from '@nativescript-community/svelte-native/dom';
 import { get } from 'svelte/store';
-import { colors } from '~/variables';
-import type OptionSelect__SvelteComponent_ from '@shared/components/OptionSelect.svelte';
-import { AlertOptions } from '@nativescript/core/ui/dialogs/dialogs-common';
+import { colors, screenWidthDips } from '~/variables';
 
 export function timeout(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
@@ -236,4 +239,90 @@ export async function showAlertDialog<T>(viewSpec: typeof SvelteComponent<T>, pr
     //     componentInstanceInfo.viewInstance.$destroy();
     //     componentInstanceInfo = null;
     // }
+}
+
+export async function showSliderPopover({
+    anchor,
+    debounceDuration = 100,
+    formatter,
+    horizPos = HorizontalPosition.ALIGN_LEFT,
+    icon,
+    max = 100,
+    min = 0,
+    onChange,
+    step = 1,
+    title,
+    value,
+    vertPos = VerticalPosition.CENTER,
+    width = 0.8 * screenWidthDips
+}: {
+    title?;
+    debounceDuration?;
+    icon?;
+    min?;
+    max?;
+    step?;
+    formatter?;
+    horizPos?;
+    anchor;
+    vertPos?;
+    width?;
+    value?;
+    onChange?;
+}) {
+    const component = (await import('@shared/components/SliderPopover.svelte')).default;
+    const { colorSurfaceContainer } = get(colors);
+
+    return showPopover({
+        backgroundColor: colorSurfaceContainer,
+        view: component,
+        anchor,
+        horizPos,
+        vertPos,
+        props: {
+            title,
+            icon,
+            min,
+            max,
+            step,
+            width,
+            formatter,
+            value,
+            onChange: debounce(onChange, debounceDuration)
+        }
+
+        // trackingScrollView: 'collectionView'
+    });
+}
+export async function showSlidersPopover({
+    anchor,
+    debounceDuration = 100,
+    horizPos = HorizontalPosition.ALIGN_LEFT,
+    items,
+    vertPos = VerticalPosition.CENTER,
+    width = 0.8 * screenWidthDips
+}: {
+    debounceDuration?;
+    horizPos?;
+    anchor;
+    vertPos?;
+    width?;
+    items;
+}) {
+    const component = (await import('@shared/components/SlidersPopover.svelte')).default;
+    const { colorSurfaceContainer } = get(colors);
+
+    return showPopover({
+        backgroundColor: colorSurfaceContainer,
+        view: component,
+        anchor,
+        horizPos,
+        vertPos,
+        props: {
+            width,
+            items
+        }
+
+        // trackingScrollView: 'collectionView'
+    });
 }
