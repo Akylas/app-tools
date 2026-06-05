@@ -1,12 +1,12 @@
 import { AppUtilsAndroid } from '@akylas/nativescript-app-utils';
 import { themer } from '@nativescript-community/ui-material-core';
-import { Application, ApplicationSettings, Color, Frame, OrientationChangedEventData, Page, Screen, Utils } from '@nativescript/core';
+import { Application, ApplicationSettings, Color, Frame, OrientationChangedEventData, Page, Screen, Style, Utils } from '@nativescript/core';
 import { getCurrentFontScale } from '@nativescript/core/accessibility/font-scale';
 import { DEFAULT_COLOR_THEME, SETTINGS_COLOR_THEME } from '@shared/constants';
 import { updateRootCss } from '@shared/utils';
 import { createGlobalEventListener, globalObservable } from '@shared/utils/svelte/ui';
 import { get, writable } from 'svelte/store';
-import { ColorThemes, getRealTheme, theme, useDynamicColors } from './helpers/theme';
+import { ColorThemes, getRealTheme, start as startThemeHelper, theme, useDynamicColors } from './helpers/theme';
 
 export const colors = writable({
     colorPrimary: '',
@@ -44,6 +44,7 @@ export const colors = writable({
     colorSurfaceContainerLowest: '',
     colorSurfaceContainerHigh: '',
     colorSurfaceContainerHighest: '',
+    colorWidgetBackground: '',
     colorOnSurfaceDisabled: '',
     popupMenuBackground: ''
 });
@@ -84,7 +85,8 @@ export const isLandscape = writable(false);
 export const onFontScaleChanged = createGlobalEventListener('fontscale');
 
 export interface Options {
-    onInitRootView?: (context) => void;
+    updateSystemFontScale?: (value) => void;
+    onInitRootView?: (context, rootViewStyle: Style) => void;
     getTheme?: (colorTheme) => string;
 }
 const options: Options = {
@@ -95,8 +97,12 @@ export function initVariables(_options: Options) {
     Object.assign(options, _options);
 }
 function updateSystemFontScale(value) {
-    fontScale.set(value);
-    globalObservable.notify({ eventName: 'fontscale', data: get(fontScale) });
+    if (options.updateSystemFontScale) {
+        options.updateSystemFontScale(value);
+    } else {
+        fontScale.set(value);
+        globalObservable.notify({ eventName: 'fontscale', data: get(fontScale) });
+    }
 }
 
 function setWindowInset(newInset) {
@@ -254,6 +260,7 @@ export const onInitRootView = function (force = false) {
     if (!force && initRootViewCalled) {
         return;
     }
+    startThemeHelper();
     // we need a timeout to read rootView css variable. not 100% sure why yet
     if (__ANDROID__) {
         // setTimeout(() => {
@@ -275,7 +282,7 @@ export const onInitRootView = function (force = false) {
         const context = Utils.android.getApplicationContext();
         DEV_LOG && console.log('hasCamera', get(hasCamera));
 
-        options?.onInitRootView?.(context);
+        options?.onInitRootView?.(context, rootViewStyle);
 
         const resources = Utils.android.getApplicationContext().getResources();
         updateSystemFontScale(resources.getConfiguration().fontScale);
@@ -314,12 +321,32 @@ export const onInitRootView = function (force = false) {
         updateIOSWindowInset();
     }
     Application.on(Application.fontScaleChangedEvent, (event) => updateSystemFontScale(event.newValue));
+    DEV_LOG && console.log('on init', theme, getRealTheme(theme));
     updateThemeColors(getRealTheme(theme));
     // DEV_LOG && console.log('initRootView', get(navigationBarHeight), get(statusBarHeight), get(actionBarHeight), get(actionBarButtonHeight), get(fonts));
     Application.off(Application.initRootViewEvent, onInitRootViewFromEvent);
     // getRealThemeAndUpdateColors();
 };
+function onOrientationChanged() {
+    if (__ANDROID__) {
+        const rootViewStyle = getRootViewStyle();
+        const context = Utils.android.getApplicationContext();
+
+        const nActionBarHeight = Utils.layout.toDeviceIndependentPixels(AppUtilsAndroid.getDimensionFromInt(context, 16843499 /* actionBarSize */));
+        if (nActionBarHeight > 0) {
+            actionBarHeight.set(nActionBarHeight);
+            rootViewStyle?.setUnscopedCssVariable('--actionBarHeight', nActionBarHeight + '');
+        }
+        const nActionBarButtonHeight = nActionBarHeight - 10;
+        actionBarButtonHeight.set(nActionBarButtonHeight);
+        rootViewStyle?.setUnscopedCssVariable('--actionBarButtonHeight', nActionBarButtonHeight + '');
+        updateRootCss();
+    } else {
+        updateIOSWindowInset();
+    }
+}
 Application.on(Application.initRootViewEvent, onInitRootViewFromEvent);
+Application.on(Application.orientationChangedEvent, onOrientationChanged);
 if (__ANDROID__) {
     Application.android.on(Application.android.activityStartedEvent, () => {
         const resources = Utils.android.getApplicationContext().getResources();
@@ -328,6 +355,7 @@ if (__ANDROID__) {
 }
 
 export function updateThemeColors(theme: string, colorTheme: ColorThemes = ApplicationSettings.getString(SETTINGS_COLOR_THEME, DEFAULT_COLOR_THEME) as ColorThemes) {
+    DEV_LOG && console.log('updateThemeColors', theme, colorTheme);
     const currentColors = get(colors);
     let rootView = Application.getRootView();
     if (rootView?.parent) {
@@ -335,7 +363,7 @@ export function updateThemeColors(theme: string, colorTheme: ColorThemes = Appli
     }
     // DEV_LOG && console.log('updateThemeColors', theme, colorTheme, rootView);
     const rootViewStyle = rootView?.style;
-    if (!rootViewStyle) {
+    if (!rootViewStyle || !theme) {
         return;
     }
     // rootViewStyle?.setUnscopedCssVariable('--fontScale', fontScale + '');
@@ -377,6 +405,7 @@ export function updateThemeColors(theme: string, colorTheme: ColorThemes = Appli
         currentColors.colorSurfaceContainerHigh = new Color(currentColors.colorSurfaceContainer).darken(10).hex;
         currentColors.colorSurfaceContainerHighest = new Color(currentColors.colorSurfaceContainer).darken(20).hex;
     }
+    currentColors.colorWidgetBackground = new Color(currentColors.colorSurfaceContainer).setAlpha(230).hex;
     currentColors.colorOnSurfaceVariant2 = new Color(currentColors.colorOnSurfaceVariant).setAlpha(170).hex;
     currentColors.colorOnSurfaceDisabled = new Color(currentColors.colorOnSurface).setAlpha(50).hex;
     Object.keys(currentColors).forEach((c) => {
