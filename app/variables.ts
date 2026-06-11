@@ -1,6 +1,6 @@
 import { AppUtilsAndroid } from '@akylas/nativescript-app-utils';
 import { themer } from '@nativescript-community/ui-material-core';
-import { Application, ApplicationSettings, Color, Frame, OrientationChangedEventData, Page, Screen, Utils } from '@nativescript/core';
+import { Application, ApplicationSettings, Color, Frame, OrientationChangedEventData, Page, Screen, Style, Utils } from '@nativescript/core';
 import { getCurrentFontScale } from '@nativescript/core/accessibility/font-scale';
 import { DEFAULT_COLOR_THEME, SETTINGS_COLOR_THEME } from '@shared/constants';
 import { updateRootCss } from '@shared/utils';
@@ -74,7 +74,6 @@ Application.on(Application.launchEvent, updateStartOrientation);
 
 export const fontScale = writable(1);
 export const isRTL = writable(false);
-export const hasCamera = writable(true);
 
 export const orientation = writable('portrait');
 export const orientationDegrees = writable(0);
@@ -84,11 +83,12 @@ export const isLandscape = writable(false);
 export const onFontScaleChanged = createGlobalEventListener('fontscale');
 
 export interface Options {
-    onInitRootView?: (context) => void;
-    getTheme?: (colorTheme) => string;
+    updateSystemFontScale?: (value) => void;
+    onInitRootView?: (context, rootViewStyle: Style) => void;
+    getTheme?: (colorTheme) => any;
 }
 const options: Options = {
-    getTheme: (colorTheme) => `~/themes/${colorTheme}.json`
+    getTheme: (colorTheme) => require(`~/themes/${colorTheme}.json`)
 };
 
 export function initVariables(_options: Options) {
@@ -273,9 +273,8 @@ export const onInitRootView = function (force = false) {
         actionBarHeight.set(parseFloat(rootViewStyle.getCssVariable('--actionBarHeight')));
         actionBarButtonHeight.set(parseFloat(rootViewStyle.getCssVariable('--actionBarButtonHeight')));
         const context = Utils.android.getApplicationContext();
-        DEV_LOG && console.log('hasCamera', get(hasCamera));
 
-        options?.onInitRootView?.(context);
+        options?.onInitRootView?.(context, rootViewStyle);
 
         const resources = Utils.android.getApplicationContext().getResources();
         updateSystemFontScale(resources.getConfiguration().fontScale);
@@ -302,6 +301,7 @@ export const onInitRootView = function (force = false) {
         }
         initRootViewCalled = !!rootView;
         fonts.set({ mdi: rootViewStyle.getCssVariable('--mdiFontFamily'), app: rootViewStyle.getCssVariable('--appFontFamily') });
+        options?.onInitRootView?.({}, rootViewStyle);
 
         const currentColors = get(colors);
         Object.keys(currentColors).forEach((c) => {
@@ -356,7 +356,7 @@ export function updateThemeColors(theme: string, colorTheme: ColorThemes = Appli
             }
         });
     } else {
-        const themeColors = require(`~/themes/${__APP_ID__}/${colorTheme}.json`);
+        const themeColors = options.getTheme ? options.getTheme(colorTheme) : require(`~/themes/${colorTheme}.json`);
         Object.assign(currentColors, theme === 'dark' || theme === 'black' ? themeColors.dark : themeColors.light);
 
         themer.setPrimaryColor(currentColors.colorPrimary);
