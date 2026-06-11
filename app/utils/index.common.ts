@@ -26,6 +26,9 @@ export function groupByArray<T>(items: T[], keyGetter: (item: T) => string[]) {
 
 export function setCustomCssRootClass(className, oldClassName?) {
     const rootView = Application.getRootView();
+    if (!rootView) {
+        return;
+    }
     const rootModalViews = rootView._getRootModalViews();
 
     function addCssClass(rootView, cssClass) {
