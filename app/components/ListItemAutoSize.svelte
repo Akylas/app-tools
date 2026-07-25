@@ -81,7 +81,8 @@
     on:tap={(event) => dispatch('tap', event)}
     on:draw={draw}
     use:conditionalEvent={{ condition: !!(item.onLongPress || onLongPress), event: 'longPress', callback: item.onLongPress || onLongPress }}
-    {...$$restProps}>
+    {...$$restProps}
+>
     <!-- <label
         fontFamily={leftIconFonFamily}
         fontSize={iconFontSize}
@@ -102,7 +103,8 @@
         textWrap={true}
         verticalTextAlignment="center"
         {...item.titleProps || $$restProps?.titleProps}
-        use:conditionalEvent={{ condition: !!(item.onLinkTap || onLinkTap), event: 'linkTap', callback: item.onLinkTap || onLinkTap }}>
+        use:conditionalEvent={{ condition: !!(item.onLinkTap || onLinkTap), event: 'linkTap', callback: item.onLinkTap || onLinkTap }}
+    >
         <cspan fontSize={fontSize * $fontScale} lineHeight={fontSize * $fontScale * 1.3} text={item.title || item.name} />
         <cspan color={item.subtitleColor || colorOnSurfaceVariant} fontSize={(item.subtitleFontSize || subtitleFontSize) * $fontScale} text={item.subtitle ? '\n' + item.subtitle : null} />
     </label>
@@ -117,6 +119,7 @@
         textAlignment="right"
         verticalAlignment="middle"
         visibility={!!item.rightValue ? 'visible' : 'collapse'}
-        on:tap={(event) => dispatch('rightIconTap', event)} />
+        on:tap={(event) => dispatch('rightIconTap', event)}
+    />
     <slot />
 </canvasview>

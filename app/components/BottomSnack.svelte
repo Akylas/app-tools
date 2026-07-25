@@ -28,7 +28,8 @@
     verticalAlignment="bottom"
     {...$$restProps}
     on:tap
-    use:conditionalEvent={{ condition: !!longPress, event: 'longPress', callback: longPress }}>
+    use:conditionalEvent={{ condition: !!longPress, event: 'longPress', callback: longPress }}
+>
     <label color={colorOnSurface} fontSize={14} fontWeight="500" maxLines={2} padding="10 12 10 12" rowSpan={2} {text} verticalTextAlignment="center" />
     <progress backgroundColor="transparent" busy={progress === -1} indeterminate={progress === -1} row={1} value={progress} visibility={progress !== null ? 'visible' : 'collapse'} />
 </gridlayout>

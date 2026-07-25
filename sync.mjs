@@ -74,7 +74,6 @@ function removeOldFiles(files) {
     }
 }
 
-
 function updateDotEnv() {
     const processEnv = {};
     config({ processEnv });

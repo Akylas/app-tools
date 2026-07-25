@@ -32,7 +32,8 @@
     rippleColor={colorPrimary}
     on:tap
     use:conditionalEvent={{ condition: !!(item.onLongPress || onLongPress), event: 'longPress', callback: item.onLongPress || onLongPress }}
-    {...$$restProps}>
+    {...$$restProps}
+>
     <canvaslabel col={mainCol} color={itemColor || color || colorOnSurface} on:draw={onDraw}>
         <cgroup paddingBottom={item.subtitle ? 10 : 0} verticalAlignment="middle">
             <cspan
@@ -42,7 +43,8 @@
                 paddingLeft="8"
                 text={item.icon}
                 visibility={item.icon ? 'visible' : 'hidden'}
-                width={iconFontSize * 2} />
+                width={iconFontSize * 2}
+            />
         </cgroup>
         <cgroup paddingLeft={(item.icon ? 38 * $fontScale : 0) + extraPaddingLeft} textAlignment="left" verticalAlignment="middle">
             <cspan fontSize={(item.fontSize || fontSize) * $fontScale} {fontWeight} text={item.title || item.name} />
@@ -50,7 +52,8 @@
                 color={item.subtitleColor || subtitleColor || colorOnSurfaceVariant}
                 fontSize={(item.subtitleFontSize || subtitleFontSize) * $fontScale}
                 text={item.subtitle ? '\n' + item.subtitle : ''}
-                visibility={item.subtitle ? 'visible' : 'hidden'} />
+                visibility={item.subtitle ? 'visible' : 'hidden'}
+            />
         </cgroup>
     </canvaslabel>
     <slot />

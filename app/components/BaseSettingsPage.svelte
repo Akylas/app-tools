@@ -487,7 +487,8 @@
             row={1}
             android:paddingBottom={$windowInset.bottom}
             {...collectionViewProps}
-            {...$$restProps}>
+            {...$$restProps}
+        >
             <Template key="sectionheader" let:item>
                 <label class="sectionHeader" {...item.additionalProps || {}} text={item.title} />
             </Template>
@@ -496,7 +497,8 @@
                 <ListItemAutoSize
                     item={{ ...item, title: getTitle(item), subtitle: getDescription(item) }}
                     on:longPress={(event) => onItemLongPress?.(item, event)}
-                    on:tap={(event) => handleItemTap(item, event)}>
+                    on:tap={(event) => handleItemTap(item, event)}
+                >
                     <switch id="checkbox" checked={item.value} col={1} marginLeft={10} verticalAlignment="center" on:checkedChange={(e) => handleOnCheckBox(item, e)} />
                 </ListItemAutoSize>
             </Template>
@@ -505,7 +507,8 @@
                 <ListItemAutoSize
                     item={{ ...item, title: getTitle(item), subtitle: getDescription(item) }}
                     on:longPress={(event) => onItemLongPress?.(item, event)}
-                    on:tap={(event) => handleItemTap(item, event)}>
+                    on:tap={(event) => handleItemTap(item, event)}
+                >
                     <checkbox id="checkbox" checked={item.value} col={1} on:checkedChange={(e) => handleOnCheckBox(item, e)} />
                 </ListItemAutoSize>
             </Template>
@@ -515,7 +518,8 @@
                     item={{ ...item, title: getTitle(item), subtitle: getDescription(item) }}
                     showBottomLine={false}
                     on:longPress={(event) => onItemLongPress?.(item, event)}
-                    on:tap={(event) => handleItemTap(item, event)}>
+                    on:tap={(event) => handleItemTap(item, event)}
+                >
                     <IconButton col={1} text={item.rightBtnIcon} on:tap={(event) => handleRightIconTap(item, event)} />
                 </ListItemAutoSize>
             </Template>
@@ -527,7 +531,8 @@
                     mainCol={1}
                     showBottomLine={false}
                     on:longPress={(event) => onItemLongPress?.(item, event)}
-                    on:tap={(event) => handleItemTap(item, event)}>
+                    on:tap={(event) => handleItemTap(item, event)}
+                >
                     <label col={0} color={colorOnBackground} fontFamily={$fonts.mdi} fontSize={24} padding="0 10 0 0" text={item.icon} verticalAlignment="center" />
                 </ListItemAutoSize>
             </Template>
@@ -537,7 +542,8 @@
                     item={{ ...item, title: getTitle(item), subtitle: getDescription(item) }}
                     showBottomLine={false}
                     on:longPress={(event) => onItemLongPress?.(item, event)}
-                    on:tap={(event) => handleItemTap(item, event)} />
+                    on:tap={(event) => handleItemTap(item, event)}
+                />
             </Template>
 
             <slot />

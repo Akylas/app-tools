@@ -268,7 +268,8 @@
                     verticalTextAlignment="center"
                     on:loaded={onTextFieldLoaded}
                     on:returnPress={blurTextField}
-                    on:textChange={(e) => (filter = e['value'])} />
+                    on:textChange={(e) => (filter = e['value'])}
+                />
 
                 <IconButton
                     col={1}
@@ -281,7 +282,8 @@
                     on:tap={() => {
                         blurTextField();
                         filter = null;
-                    }} />
+                    }}
+                />
             </gridlayout>
         {/if}
         <collectionView
@@ -294,7 +296,8 @@
             row={2}
             {rowHeight}
             on:dataPopulated={onDataPopulated}
-            ios:contentInsetAdjustmentBehavior={2}>
+            ios:contentInsetAdjustmentBehavior={2}
+        >
             <Template key="checkbox" let:item>
                 <svelte:component
                     this={component}
@@ -311,14 +314,16 @@
                     {titleProps}
                     {...templateProps}
                     onLongPress={onLongPress ? (e) => onLongPress(item, e) : null}
-                    on:tap={(event) => onTap(item, event)}>
+                    on:tap={(event) => onTap(item, event)}
+                >
                     <checkbox
                         id="checkbox"
                         boxType={item.boxType}
                         checked={item.value}
                         col={item.boxType === 'circle' ? 0 : 2}
                         verticalAlignment="center"
-                        on:checkedChange={(e) => onCheckedChanged(item, e)} />
+                        on:checkedChange={(e) => onCheckedChanged(item, e)}
+                    />
                 </svelte:component>
             </Template>
             <Template key="switch" let:item>
@@ -337,7 +342,8 @@
                     {titleProps}
                     {...templateProps}
                     onLongPress={onLongPress ? (e) => onLongPress(item, e) : null}
-                    on:tap={(event) => onTap(item, event)}>
+                    on:tap={(event) => onTap(item, event)}
+                >
                     <switch id="checkbox" checked={item.value} col={1} marginLeft={10} on:checkedChange={(e) => onCheckedChanged(item, e)} />
                 </svelte:component>
             </Template>
@@ -356,7 +362,8 @@
                     {titleProps}
                     {...templateProps}
                     onLongPress={onLongPress ? (e) => onLongPress(item, e) : null}
-                    on:tap={(event) => onTap(item, event)}>
+                    on:tap={(event) => onTap(item, event)}
+                >
                     <mdbutton class="icon-btn" col={1} text={item.rightIcon} variant="text" on:tap={(event) => onRightTap(item, event)} />
                 </svelte:component>
             </Template>
@@ -375,7 +382,8 @@
                     {titleProps}
                     {...templateProps}
                     onLongPress={onLongPress ? (e) => onLongPress(item, e) : null}
-                    on:tap={(event) => onTap(item, event)}>
+                    on:tap={(event) => onTap(item, event)}
+                >
                     <label
                         col={0}
                         color={item.iconColor || colorOnSurface}
@@ -384,7 +392,8 @@
                         paddingLeft="8"
                         text={item.icon}
                         verticalAlignment="center"
-                        width={iconFontSize * 2} />
+                        width={iconFontSize * 2}
+                    />
                 </svelte:component>
             </Template>
             <Template key="image" let:item>
@@ -404,7 +413,8 @@
                     {titleProps}
                     {...templateProps}
                     onLongPress={onLongPress ? (e) => onLongPress(item, e) : null}
-                    on:tap={(event) => onTap(item, event)}>
+                    on:tap={(event) => onTap(item, event)}
+                >
                     <image borderRadius={4} col={0} marginBottom={5} marginRight={10} marginTop={5} src={item.image} />
                 </svelte:component>
             </Template>
@@ -425,14 +435,16 @@
                     {titleProps}
                     {...templateProps}
                     onLongPress={onLongPress ? (e) => onLongPress(item, e) : null}
-                    on:tap={(event) => onTap(item, event)}>
+                    on:tap={(event) => onTap(item, event)}
+                >
                     <checkbox
                         id="checkbox"
                         boxType={item.boxType}
                         checked={item.value}
                         col={item.boxType === 'circle' ? 0 : 2}
                         verticalAlignment="center"
-                        on:checkedChange={(e) => onCheckedChanged(item, e)} />
+                        on:checkedChange={(e) => onCheckedChanged(item, e)}
+                    />
                     <image borderRadius={4} col={2} marginBottom={5} marginRight={10 + (item.imageMargin ?? 0)} marginTop={5} src={item.image} stretch="aspectFit" width={item.imageWidth ?? 50} />
                 </svelte:component>
             </Template>Z
@@ -451,8 +463,8 @@
                     {...templateProps}
                     onLongPress={onLongPress ? (e) => onLongPress(item, e) : null}
                     on:rightTap={(event) => onRightTap(item, event)}
-                    on:tap={(event) => onTap(item, event)}>
-                </svelte:component>
+                    on:tap={(event) => onTap(item, event)}
+                ></svelte:component>
             </Template>
             <slot name="templates" />
         </collectionView>
