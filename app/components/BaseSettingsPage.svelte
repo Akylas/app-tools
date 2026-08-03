@@ -16,7 +16,7 @@
     import { createView, showAlertOptionSelect, showSliderPopover } from '@shared/utils/ui';
     import { onLanguageChanged } from '~/helpers/locale';
     import { onThemeChanged } from '~/helpers/theme';
-    import { showSettings } from '~/utils/ui';
+    import { showSettings } from '@shared/utils/ui';
     import { colors, fonts, onFontScaleChanged, windowInset } from '~/variables';
     const storeSettings = {};
     export function getStoreSetting(k: string, defaultValue) {
