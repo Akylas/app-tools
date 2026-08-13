@@ -100,7 +100,8 @@
         {...$$restProps}
         on:draw={onCanvasDraw}
         on:tap
-        use:conditionalEvent={{ condition: !!actualLongPress, event: 'longPress', callback: actualLongPress }} />
+        use:conditionalEvent={{ condition: !!actualLongPress, event: 'longPress', callback: actualLongPress }}
+    />
 {:else}
     <mdbutton
         color={isSelected ? selectedColor : actualColor}
@@ -121,5 +122,6 @@
         width={width || size}
         on:tap
         on:longPress={actualLongPress}
-        use:conditionalEvent={{ condition: !!actualLongPress, event: 'longPress', callback: actualLongPress }} />
+        use:conditionalEvent={{ condition: !!actualLongPress, event: 'longPress', callback: actualLongPress }}
+    />
 {/if}

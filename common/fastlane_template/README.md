@@ -1,5 +1,4 @@
-fastlane documentation
-----
+## fastlane documentation
 
 # Installation
 
@@ -67,15 +66,11 @@ Prepare the application.
 [bundle exec] fastlane build_and_publish
 ```
 
-
-
 ### build_flavor
 
 ```sh
 [bundle exec] fastlane build_flavor
 ```
-
-
 
 ### svelteCheck
 
@@ -83,18 +78,13 @@ Prepare the application.
 [bundle exec] fastlane svelteCheck
 ```
 
-
-
 ### get_changelog
 
 ```sh
 [bundle exec] fastlane get_changelog
 ```
 
-
-
-----
-
+---
 
 ## iOS
 
@@ -111,8 +101,6 @@ Upload Dsyms to Sentry
 ```sh
 [bundle exec] fastlane ios upload_store
 ```
-
-
 
 ### ios certificates
 
@@ -154,8 +142,7 @@ Ship iOS build to Testflight.
 
 Ship iOS build to AppStore.
 
-----
-
+---
 
 ## Android
 
@@ -165,7 +152,7 @@ Ship iOS build to AppStore.
 [bundle exec] fastlane android sentry_upload
 ```
 
-Upload  to Sentry
+Upload to Sentry
 
 ### android write_changelog
 
@@ -173,15 +160,11 @@ Upload  to Sentry
 [bundle exec] fastlane android write_changelog
 ```
 
-
-
 ### android upload_store
 
 ```sh
 [bundle exec] fastlane android upload_store
 ```
-
-
 
 ### android build
 
@@ -223,7 +206,7 @@ Ship to Android Playstore Beta.
 
 Ship to Android Playstore Alpha.
 
-----
+---
 
 This README.md is auto-generated and will be re-generated every time [_fastlane_](https://fastlane.tools) is run.
 

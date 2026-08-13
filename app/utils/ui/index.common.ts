@@ -15,6 +15,7 @@ import { showError } from '@shared/utils/showError';
 import { ComponentProps } from 'svelte';
 import { get } from 'svelte/store';
 import { colors, screenWidthDips } from '~/variables';
+import { navigate } from '@shared/utils/svelte/ui';
 
 export function timeout(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
@@ -324,4 +325,16 @@ export async function showSlidersPopover({
 
         // trackingScrollView: 'collectionView'
     });
+}
+
+export async function showSettings(props?) {
+    try {
+        const Settings = (await import('~/components/settings/Settings.svelte')).default;
+        navigate({
+            page: Settings,
+            props
+        });
+    } catch (error) {
+        showError(error);
+    }
 }

@@ -6,7 +6,7 @@ import { closePopover } from '@nativescript-community/ui-popover/svelte';
 import { Application, ApplicationEventData, ApplicationSettings, SystemAppearanceChangedEventData, Utils } from '@nativescript/core';
 import { getBoolean, getString, setString } from '@nativescript/core/application-settings';
 import { SDK_VERSION } from '@nativescript/core/utils';
-import { ALERT_OPTION_MAX_HEIGHT, DEFAULT_COLOR_THEME, SETTINGS_COLOR_THEME } from '~/helpers/constants';
+import { ALERT_OPTION_MAX_HEIGHT, DEFAULT_COLOR_THEME, SETTINGS_COLOR_THEME } from '@shared/constants';
 import { prefs } from '@shared/services/preferences';
 import { setCustomCssRootClass } from '@shared/utils';
 import { showError } from '@shared/utils/showError';

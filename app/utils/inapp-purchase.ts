@@ -20,7 +20,6 @@ export function init() {
                         }
                     } else if (event.result === PaymentEvent.Result.FAILURE) {
                         // DEV_LOG && console.log('in_app_failure', (event as PaymentEvent.ConnectingStore.IFailure).payload.description);
-
                         // showError(new Error(lc('in_app_failure', (event as PaymentEvent.ConnectingStore.IFailure).payload.description)));
                     }
                     break;

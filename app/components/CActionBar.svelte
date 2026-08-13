@@ -62,7 +62,8 @@
         verticalTextAlignment="center"
         visibility={!!title ? 'visible' : 'hidden'}
         {...$$restProps?.titleProps}
-        use:conditionalEvent={{ condition: !!onTitleTap, event: 'tap', callback: onTitleTap }} />
+        use:conditionalEvent={{ condition: !!onTitleTap, event: 'tap', callback: onTitleTap }}
+    />
     <stacklayout col={0} orientation="horizontal">
         <slot name="left" />
         <mdbutton class={'actionBarButton ' + clazz} defaultVisualState={buttonsDefaultVisualState} text={menuIcon} variant="text" visibility={menuIconVisibility} on:tap={onMenuIcon} />

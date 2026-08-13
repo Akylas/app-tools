@@ -98,7 +98,8 @@
         returnKeyType="search"
         variant="outline"
         on:returnPress={blurTextField}
-        on:textChange={(e) => onTextChanged(e['value'])} />
+        on:textChange={(e) => onTextChanged(e['value'])}
+    />
     <!-- <mdbutton
         class="actionBarButton"
         height={40}
