@@ -2,8 +2,8 @@
     import { Canvas, CanvasView, LayoutAlignment, Paint, StaticLayout } from '@nativescript-community/ui-canvas';
     import { NativeViewElementNode } from '@nativescript-community/svelte-native/dom';
     import { conditionalEvent } from '@shared/utils/svelte/ui';
-    import { showToolTip } from '~/utils/ui';
     import { actionBarButtonHeight, colors, fonts } from '~/variables';
+    import { showToolTip } from '@shared/utils/ui';
 
     const iconPaints: { [k: string]: Paint } = {};
     const subtitlePaint = new Paint();
