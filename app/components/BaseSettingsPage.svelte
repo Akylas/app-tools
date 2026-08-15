@@ -205,7 +205,31 @@
         collectionView?.nativeView?.refreshVisibleItems();
     }
 
+    /**
+     * Where a setting lives: a svelte store when the item carries one (the app then owns persistence and
+     * every subscriber sees the change), `ApplicationSettings` otherwise.
+     */
+    function writeItemValue(item, value) {
+        if (item.store) {
+            item.store.set(value);
+        } else if (item.valueType === 'string') {
+            ApplicationSettings.setString(item.key, value + '');
+        } else {
+            ApplicationSettings.setNumber(item.key, value);
+        }
+    }
+    function clearItemValue(item) {
+        if (item.store) {
+            // a plain writable has no reset: the app decides what "no value" means for it
+            item.store.reset?.();
+        } else {
+            ApplicationSettings.remove(item.key);
+        }
+    }
+
     export function updateItem(item, key = 'key') {
+        // lets the app push the new value where it is actually consumed (a service, a native decoder…)
+        item?.onUpdate?.(key, item[key], item.default);
         const itemKey = item?.[key] !== undefined ? item[key] : (item?.key ?? item?.id);
         const index = displayedItems?.findIndex((it) => it === item || (itemKey !== undefined && (it[key] === itemKey || it.key === itemKey || it.id === itemKey)));
         if (index !== -1) {
@@ -236,7 +260,15 @@
             case 'store_setting':
             case 'setting': {
                 if (item.type === 'prompt') {
-                    const defaultValue = typeof item.rightValue === 'function' ? item.rightValue() : typeof item.default === 'function' ? item.default() : item.default;
+                    // `currentValue` first: `rightValue` can be a formatted string, which is not what a prompt should start from
+                    const defaultValue =
+                        typeof item.currentValue === 'function'
+                            ? item.currentValue()
+                            : typeof item.rightValue === 'function'
+                              ? item.rightValue()
+                              : typeof item.default === 'function'
+                                ? item.default()
+                                : item.default;
                     const result = await prompt({
                         title: getTitle(item),
                         messageView: createView(Label, {
@@ -286,28 +318,23 @@
                             }
                             DEV_LOG && console.log('store_setting', store);
                             ApplicationSettings.setString(item.storeKey, JSON.stringify(store));
+                        } else if (result.text.length > 0) {
+                            writeItemValue(item, item.valueType === 'string' ? result.text : parseFloat(result.text));
                         } else {
-                            if (result.text.length > 0) {
-                                if (item.valueType === 'string') {
-                                    ApplicationSettings.setString(item.key, result.text);
-                                } else {
-                                    ApplicationSettings.setNumber(item.key, parseInt(result.text, 10));
-                                }
-                            } else {
-                                ApplicationSettings.remove(item.key);
-                            }
+                            clearItemValue(item);
                         }
                         updateItem(item);
                     }
                 } else if (item.type === 'slider') {
                     await showSliderPopover({
                         anchor: event.object,
-                        value: (item.currentValue || item.rightValue)?.(),
                         ...item,
+                        value: (item.currentValue || item.rightValue)?.(),
+                        defaultValue: item.defaultValue ?? item.default,
                         onChange(value) {
                             if (item.transformValue) {
                                 value = item.transformValue(value, item);
-                            } else {
+                            } else if (item.step > 0) {
                                 value = Math.round(value / item.step) * item.step;
                             }
                             if (item.id === 'store_setting') {
@@ -319,11 +346,7 @@
                                 }
                                 ApplicationSettings.setString(item.storeKey, JSON.stringify(store));
                             } else {
-                                if (item.valueType === 'string') {
-                                    ApplicationSettings.setString(item.key, value + '');
-                                } else {
-                                    ApplicationSettings.setNumber(item.key, value);
-                                }
+                                writeItemValue(item, value);
                             }
                             updateItem(item);
                         }
@@ -367,15 +390,11 @@
                                 if (item.valueType === 'string') {
                                     store[item.key] = result.data;
                                 } else {
-                                    store[item.key] = parseInt(result.data, 10);
+                                    store[item.key] = parseFloat(result.data);
                                 }
                                 ApplicationSettings.setString(item.storeKey, JSON.stringify(store));
                             } else {
-                                if (item.valueType === 'string') {
-                                    ApplicationSettings.setString(item.key, result.data);
-                                } else {
-                                    ApplicationSettings.setNumber(item.key, parseInt(result.data, 10));
-                                }
+                                writeItemValue(item, item.valueType === 'string' ? result.data : parseFloat(result.data));
                             }
                             updateItem(item);
                         }
@@ -433,8 +452,12 @@
         try {
             ignoreNextOnCheckBoxChange = true;
             const handled = (await onCheckBox?.(item, event)) === true;
-            if (!handled && (item.key || item.id)) {
-                ApplicationSettings.setBoolean(item.key || item.id, value);
+            if (!handled) {
+                if (item.store) {
+                    item.store.set(value);
+                } else if (item.key || item.id) {
+                    ApplicationSettings.setBoolean(item.key || item.id, value);
+                }
             }
         } catch (error) {
             showError(error);
@@ -477,7 +500,8 @@
 </script>
 
 <page bind:this={page} {id} actionBarHidden={true}>
-    <gridlayout class="pageContent" rows="auto,*">
+    <!-- the insets come from the store rather than the `pageContent` css variables, which not every app defines -->
+    <gridlayout class="pageContent" paddingLeft={$windowInset.left} paddingRight={$windowInset.right} rows="auto,*">
         <collectionview
             bind:this={collectionView}
             accessibilityValue="settingsCV"

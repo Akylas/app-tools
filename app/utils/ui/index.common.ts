@@ -244,6 +244,7 @@ export async function showAlertDialog<T>(viewSpec: typeof SvelteComponent<T>, pr
 export async function showSliderPopover({
     anchor,
     debounceDuration = 100,
+    defaultValue,
     formatter,
     horizPos = HorizontalPosition.ALIGN_LEFT,
     icon,
@@ -253,6 +254,7 @@ export async function showSliderPopover({
     step = 1,
     title,
     value,
+    valueFormatter,
     vertPos = VerticalPosition.CENTER,
     width = 0.8 * screenWidthDips
 }: {
@@ -263,11 +265,13 @@ export async function showSliderPopover({
     max?;
     step?;
     formatter?;
+    valueFormatter?;
     horizPos?;
     anchor;
     vertPos?;
     width?;
     value?;
+    defaultValue?;
     onChange?;
 }) {
     const component = (await import('@shared/components/SliderPopover.svelte')).default;
@@ -280,6 +284,7 @@ export async function showSliderPopover({
         horizPos,
         vertPos,
         props: {
+            elevation: __ANDROID__ ? 3 : 0,
             title,
             icon,
             min,
@@ -287,8 +292,10 @@ export async function showSliderPopover({
             step,
             width,
             formatter,
+            valueFormatter,
             value,
-            onChange: debounce(onChange, debounceDuration)
+            defaultValue,
+            onChange: debounceDuration ? debounce(onChange, debounceDuration) : onChange
         }
 
         // trackingScrollView: 'collectionView'
@@ -319,6 +326,7 @@ export async function showSlidersPopover({
         horizPos,
         vertPos,
         props: {
+            elevation: __ANDROID__ ? 3 : 0,
             width,
             items
         }
