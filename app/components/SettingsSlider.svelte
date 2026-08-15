@@ -30,9 +30,23 @@
     export let formatter = (value) => value + '';
     export let valueFormatter = (value) => value.toFixed(1);
 
+    /**
+     * Material's slider throws outright — not a warning, an IllegalStateException while drawing — when
+     * the value is not `min` plus a whole number of steps. A stored setting has no reason to be one:
+     * the step, the min or the unit can change under a value that was saved long before, and the value
+     * prompt below takes any number the user types. Snapping on the way in mirrors what the callers'
+     * `onChange` already does on the way out.
+     */
+    function snapToStep(rawValue: number) {
+        if (!(step > 0) || typeof rawValue !== 'number' || !isFinite(rawValue)) {
+            return rawValue;
+        }
+        return Math.min(max, Math.max(min, min + Math.round((rawValue - min) / step) * step));
+    }
+
     // let canvas: NativeViewElementNode<CanvasView>;
     let actualValue;
-    $: actualValue = value ?? defaultValue;
+    $: actualValue = snapToStep(value ?? defaultValue);
     function onValueChange(event) {
         value = event.value;
         onChange?.(event.value);
@@ -55,7 +69,7 @@
             });
             Utils.dismissSoftInput();
             if (result && !!result.result && result.text.length > 0) {
-                value = parseInt(result.text, 10);
+                value = snapToStep(parseInt(result.text, 10));
                 onChange?.(value);
             }
         } catch (error) {

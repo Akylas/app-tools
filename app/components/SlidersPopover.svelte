@@ -8,6 +8,26 @@
     $: ({ colorPrimary } = $colors);
     export let items: { icon?: string; title?: string; min: number; max: number; step: number; value?: number; resetValue?: number; onChange: Function; formatter?: Function }[] = [];
 
+    /**
+     * Material's slider throws outright — not a warning, an IllegalStateException while drawing — when
+     * the value is not `min` plus a whole number of steps. A stored setting has no reason to be one:
+     * the step, the min or the unit can change under a value that was saved long before. Snapping on
+     * the way in mirrors what the callers' `onChange` already does on the way out.
+     */
+    function snapToStep(item, rawValue: number) {
+        const min = item.min ?? 0;
+        if (!(item.step > 0) || typeof rawValue !== 'number' || !isFinite(rawValue)) {
+            return rawValue;
+        }
+        return Math.min(item.max, Math.max(min, min + Math.round((rawValue - min) / item.step) * item.step));
+    }
+    // once, as the popover opens: the label reads `item.value` and the slider is handed the same one,
+    // so snapping only the binding would show a number the slider is not sitting on
+    items.forEach((item) => {
+        item.value = snapToStep(item, item.value);
+        item.resetValue = snapToStep(item, item.resetValue);
+    });
+
     function onValueChange(item, event) {
         item.value = event.value; // needed for resetValue to update the slider
         if (item.onChange) {
