@@ -11,6 +11,7 @@
     export let forceCanGoBack: boolean = false;
     export let modalWindow: boolean = false;
     export let disableBackButton: boolean = false;
+    export let labelsDefaultVisualState = null;
     export let buttonsDefaultVisualState = null;
     export let clazz: string = '';
     export let onGoBack: Function = null;
@@ -62,6 +63,7 @@
         verticalTextAlignment="center"
         visibility={!!title ? 'visible' : 'hidden'}
         {...$$restProps?.titleProps}
+        defaultVisualState={labelsDefaultVisualState}
         use:conditionalEvent={{ condition: !!onTitleTap, event: 'tap', callback: onTitleTap }} />
     <stacklayout col={0} orientation="horizontal">
         <slot name="left" />

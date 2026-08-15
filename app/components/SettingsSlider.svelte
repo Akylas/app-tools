@@ -3,12 +3,12 @@
 <script context="module" lang="ts">
     import { Paint } from '@nativescript-community/ui-canvas';
     import { showError } from '@shared/utils/showError';
-    import { colors, fontScale, fontScaleMaxed, fonts } from '~/variables';
+    import { colors, fontScale, fonts } from '~/variables';
     import { TextFieldProperties } from '@nativescript-community/ui-material-textfield';
     import { prompt } from '@nativescript-community/ui-material-dialogs';
     import { l } from '~/helpers/locale';
     import { Utils } from '@nativescript/core';
-    import IconButton from '~/components/common/IconButton.svelte';
+    import IconButton from '@shared/components/IconButton.svelte';
 </script>
 
 <script lang="ts">

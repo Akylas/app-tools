@@ -92,7 +92,7 @@
 
     function updateFiltered(filter) {
         if (filter) {
-            filteredOptions = options.filter((d) => d.name.indexOf(filter) !== -1);
+            filteredOptions = options.filter((d) => d.name.toLowerCase().indexOf(filter) !== -1);
         } else {
             filteredOptions = options;
         }
@@ -268,7 +268,7 @@
                     verticalTextAlignment="center"
                     on:loaded={onTextFieldLoaded}
                     on:returnPress={blurTextField}
-                    on:textChange={(e) => (filter = e['value'])}
+                    on:textChange={(e) => (filter = e['value']?.toLowerCase())}
                 />
 
                 <IconButton
@@ -321,6 +321,7 @@
                         boxType={item.boxType}
                         checked={item.value}
                         col={item.boxType === 'circle' ? 0 : 2}
+                        ios:marginRight={10}
                         verticalAlignment="center"
                         on:checkedChange={(e) => onCheckedChanged(item, e)}
                     />
@@ -415,7 +416,7 @@
                     onLongPress={onLongPress ? (e) => onLongPress(item, e) : null}
                     on:tap={(event) => onTap(item, event)}
                 >
-                    <image borderRadius={4} col={0} marginBottom={5} marginRight={10} marginTop={5} src={item.image} />
+                    <image borderRadius={4} col={0} colorMatrix={item.imageMatrix} marginBottom={5} marginRight={10} marginTop={5} src={item.image} />
                 </svelte:component>
             </Template>
             <Template key="checkbox_image" let:item>
@@ -447,7 +448,7 @@
                     />
                     <image borderRadius={4} col={2} marginBottom={5} marginRight={10 + (item.imageMargin ?? 0)} marginTop={5} src={item.image} stretch="aspectFit" width={item.imageWidth ?? 50} />
                 </svelte:component>
-            </Template>Z
+            </Template>
             <Template let:item>
                 <svelte:component
                     this={component}
