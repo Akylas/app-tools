@@ -53,6 +53,7 @@ export const fonts = writable({
     app: ''
 });
 export const windowInset = writable({ top: 0, left: 0, right: 0, bottom: 0 });
+export const isMacCatalyst = __IOS__ && NSProcessInfo.processInfo.macCatalystApp;
 export const actionBarButtonHeight = writable(0);
 export const actionBarHeight = writable(0);
 let startOrientation;
@@ -61,6 +62,7 @@ let startingInLandscape;
 export let screenHeightDips = startingInLandscape ? Screen.mainScreen.widthDIPs : Screen.mainScreen.heightDIPs;
 export let screenWidthDips = startingInLandscape ? Screen.mainScreen.heightDIPs : Screen.mainScreen.widthDIPs;
 export let screenRatio = screenWidthDips / screenHeightDips;
+export const windowSize = writable({ width: screenWidthDips, height: screenHeightDips });
 
 function updateStartOrientation() {
     startOrientation = Application.orientation();
@@ -105,6 +107,7 @@ function updateSystemFontScale(value) {
 }
 
 function setWindowInset(newInset) {
+    DEV_LOG && console.log('setWindowInset', JSON.stringify(newInset));
     windowInset.set(newInset);
     const rootViewStyle = getRootViewStyle();
     rootViewStyle?.setUnscopedCssVariable('--windowInsetLeft', newInset.left + '');
@@ -114,10 +117,10 @@ function setWindowInset(newInset) {
 function updateIOSWindowInset() {
     if (__IOS__) {
         setTimeout(() => {
-            const safeAreaInsets = UIApplication.sharedApplication.keyWindow?.safeAreaInsets;
-            // DEV_LOG && console.log('safeAreaInsets', safeAreaInsets.top, safeAreaInsets.right, safeAreaInsets.bottom, safeAreaInsets.left);
+            const safeAreaInsets = Application.ios.window?.safeAreaInsets;
+            DEV_LOG && console.log('safeAreaInsets', safeAreaInsets?.top, safeAreaInsets?.right, safeAreaInsets?.bottom, safeAreaInsets?.left);
             if (safeAreaInsets) {
-                windowInset.set({
+                setWindowInset({
                     left: Math.round(safeAreaInsets.left),
                     top: 0,
                     right: Math.round(safeAreaInsets.right),
@@ -126,6 +129,20 @@ function updateIOSWindowInset() {
             }
         }, 0);
     }
+}
+
+function updateIOSWindowSize() {
+    const bounds = Application.ios.window?.bounds;
+    if (!bounds) {
+        return;
+    }
+    screenWidthDips = Math.round(bounds.size.width);
+    screenHeightDips = Math.round(bounds.size.height);
+    screenRatio = screenWidthDips / screenHeightDips;
+    windowSize.set({ width: screenWidthDips, height: screenHeightDips });
+    const newOrientation = screenWidthDips > screenHeightDips ? 'landscape' : 'portrait';
+    orientation.set(newOrientation);
+    isLandscape.set(newOrientation === 'landscape');
 }
 
 function getRootViewStyle() {
@@ -318,6 +335,13 @@ export const onInitRootView = function (force = false) {
         actionBarHeight.set(parseFloat(rootViewStyle.getCssVariable('--actionBarHeight')));
         actionBarButtonHeight.set(parseFloat(rootViewStyle.getCssVariable('--actionBarButtonHeight')));
         updateIOSWindowInset();
+        if (isMacCatalyst) {
+            // the window is resizable
+            rootView.on('layoutChanged', () => {
+                updateIOSWindowSize();
+                updateIOSWindowInset();
+            });
+        }
     }
     Application.on(Application.fontScaleChangedEvent, (event) => updateSystemFontScale(event.newValue));
     DEV_LOG && console.log('on init', theme, getRealTheme(theme));
