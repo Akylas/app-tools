@@ -243,6 +243,7 @@ export async function showAlertDialog<T>(viewSpec: typeof SvelteComponent<T>, pr
 
 export async function showSliderPopover({
     anchor,
+    backgroundColor = get(colors).colorSurfaceContainer,
     debounceDuration = 100,
     defaultValue,
     formatter,
@@ -251,6 +252,7 @@ export async function showSliderPopover({
     max = 100,
     min = 0,
     onChange,
+    props = {},
     step = 1,
     title,
     value,
@@ -259,6 +261,10 @@ export async function showSliderPopover({
     width = 0.8 * screenWidthDips
 }: {
     title?;
+    /** The popover's own background, behind the view. */
+    backgroundColor?;
+    /** Extra props for the view's container, to restyle it. */
+    props?;
     debounceDuration?;
     icon?;
     min?;
@@ -275,10 +281,9 @@ export async function showSliderPopover({
     onChange?;
 }) {
     const component = (await import('@shared/components/SliderPopover.svelte')).default;
-    const { colorSurfaceContainer } = get(colors);
 
     return showPopover({
-        backgroundColor: colorSurfaceContainer,
+        backgroundColor,
         view: component,
         anchor,
         horizPos,
@@ -295,7 +300,8 @@ export async function showSliderPopover({
             valueFormatter,
             value,
             defaultValue,
-            onChange: debounceDuration ? debounce(onChange, debounceDuration) : onChange
+            onChange: debounceDuration ? debounce(onChange, debounceDuration) : onChange,
+            ...props
         }
 
         // trackingScrollView: 'collectionView'
@@ -303,12 +309,18 @@ export async function showSliderPopover({
 }
 export async function showSlidersPopover({
     anchor,
+    backgroundColor = get(colors).colorSurfaceContainer,
     debounceDuration = 100,
     horizPos = HorizontalPosition.ALIGN_LEFT,
     items,
+    props = {},
     vertPos = VerticalPosition.CENTER,
     width = 0.8 * screenWidthDips
 }: {
+    /** The popover's own background, behind the view. */
+    backgroundColor?;
+    /** Extra props for the view's container, to restyle it. */
+    props?;
     debounceDuration?;
     horizPos?;
     anchor;
@@ -317,10 +329,9 @@ export async function showSlidersPopover({
     items;
 }) {
     const component = (await import('@shared/components/SlidersPopover.svelte')).default;
-    const { colorSurfaceContainer } = get(colors);
 
     return showPopover({
-        backgroundColor: colorSurfaceContainer,
+        backgroundColor,
         view: component,
         anchor,
         horizPos,
@@ -328,7 +339,8 @@ export async function showSlidersPopover({
         props: {
             elevation: __ANDROID__ ? 3 : 0,
             width,
-            items
+            items,
+            ...props
         }
 
         // trackingScrollView: 'collectionView'
