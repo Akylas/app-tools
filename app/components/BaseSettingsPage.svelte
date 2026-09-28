@@ -50,6 +50,12 @@
     export let getSubSettings: ((id: string) => any[]) | null = null;
 
     export let collectionViewProps: any = {};
+    /** Spread into every row, to restyle them from the app. */
+    export let itemProps: any = {};
+    /** When set, the left icon is styled by this css class alone instead of the inline defaults. */
+    export let leftIconClass: string = null;
+    /** `backgroundColor` and `props` for the slider popovers, to restyle them. */
+    export let sliderPopoverStyle: { backgroundColor?: string; props?: any } = {};
     export let getTitle: (item: any) => string = (item) => {
         switch (item.id) {
             case 'token':
@@ -327,6 +333,7 @@
                     }
                 } else if (item.type === 'slider') {
                     await showSliderPopover({
+                        ...sliderPopoverStyle,
                         anchor: event.object,
                         ...item,
                         value: (item.currentValue || item.rightValue)?.(),
@@ -518,6 +525,7 @@
             <Template key="switch" let:item>
                 <ListItemAutoSize
                     item={{ ...item, title: getTitle(item), subtitle: getDescription(item) }}
+                    {...itemProps}
                     on:longPress={(event) => onItemLongPress?.(item, event)}
                     on:tap={(event) => handleItemTap(item, event)}>
                     <switch id="checkbox" checked={item.value} col={1} marginLeft={10} verticalAlignment="center" on:checkedChange={(e) => handleOnCheckBox(item, e)} />
@@ -527,6 +535,7 @@
             <Template key="checkbox" let:item>
                 <ListItemAutoSize
                     item={{ ...item, title: getTitle(item), subtitle: getDescription(item) }}
+                    {...itemProps}
                     on:longPress={(event) => onItemLongPress?.(item, event)}
                     on:tap={(event) => handleItemTap(item, event)}>
                     <checkbox id="checkbox" checked={item.value} col={1} on:checkedChange={(e) => handleOnCheckBox(item, e)} />
@@ -536,6 +545,7 @@
             <Template key="rightIcon" let:item>
                 <ListItemAutoSize
                     item={{ ...item, title: getTitle(item), subtitle: getDescription(item) }}
+                    {...itemProps}
                     showBottomLine={false}
                     on:longPress={(event) => onItemLongPress?.(item, event)}
                     on:tap={(event) => handleItemTap(item, event)}>
@@ -547,17 +557,23 @@
                 <ListItemAutoSize
                     columns="auto,*,auto"
                     item={{ ...item, title: getTitle(item), subtitle: getDescription(item) }}
+                    {...itemProps}
                     mainCol={1}
                     showBottomLine={false}
                     on:longPress={(event) => onItemLongPress?.(item, event)}
                     on:tap={(event) => handleItemTap(item, event)}>
-                    <label col={0} color={colorOnBackground} fontFamily={$fonts.mdi} fontSize={24} padding="0 10 0 0" text={item.icon} verticalAlignment="center" />
+                    {#if leftIconClass}
+                        <label class={leftIconClass} col={0} text={item.icon} />
+                    {:else}
+                        <label col={0} color={colorOnBackground} fontFamily={$fonts.mdi} fontSize={24} padding="0 10 0 0" text={item.icon} verticalAlignment="center" />
+                    {/if}
                 </ListItemAutoSize>
             </Template>
 
             <Template let:item>
                 <ListItemAutoSize
                     item={{ ...item, title: getTitle(item), subtitle: getDescription(item) }}
+                    {...itemProps}
                     showBottomLine={false}
                     on:longPress={(event) => onItemLongPress?.(item, event)}
                     on:tap={(event) => handleItemTap(item, event)} />
