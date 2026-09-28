@@ -107,7 +107,6 @@ function updateSystemFontScale(value) {
 }
 
 function setWindowInset(newInset) {
-    DEV_LOG && console.log('setWindowInset', JSON.stringify(newInset));
     windowInset.set(newInset);
     const rootViewStyle = getRootViewStyle();
     rootViewStyle?.setUnscopedCssVariable('--windowInsetLeft', newInset.left + '');
@@ -118,7 +117,7 @@ function updateIOSWindowInset() {
     if (__IOS__) {
         setTimeout(() => {
             const safeAreaInsets = Application.ios.window?.safeAreaInsets;
-            DEV_LOG && console.log('safeAreaInsets', safeAreaInsets?.top, safeAreaInsets?.right, safeAreaInsets?.bottom, safeAreaInsets?.left);
+            // DEV_LOG && console.log('safeAreaInsets', safeAreaInsets?.top, safeAreaInsets?.right, safeAreaInsets?.bottom, safeAreaInsets?.left);
             if (safeAreaInsets) {
                 setWindowInset({
                     left: Math.round(safeAreaInsets.left),
