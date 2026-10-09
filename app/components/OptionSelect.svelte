@@ -13,7 +13,8 @@
     import IconButton from '@shared/components/IconButton.svelte';
     import ListItem from '@shared/components/ListItem.svelte';
     import ListItemAutoSize from '@shared/components/ListItemAutoSize.svelte';
-    import { onDestroy } from 'svelte';
+    import TogglePill from '@shared/components/TogglePill.svelte';
+    import { type ComponentType, onDestroy } from 'svelte';
     import { NativeViewElementNode } from '@nativescript-community/svelte-native/dom';
     import { lc } from '~/helpers/locale';
     import { colors, fontScale, fonts } from '~/variables';
@@ -38,6 +39,12 @@
         onDraw?: (item: IListItem, event: { canvas: Canvas; object: CanvasView }) => void;
         [k: string]: any;
     }
+    export interface OptionToggle {
+        id: string;
+        icon?: string;
+        label: string;
+        selected: boolean;
+    }
     export interface OptionType extends IListItem {
         group?: string;
         isPick?: boolean;
@@ -49,11 +56,22 @@
 
 <script lang="ts">
     export let title: string = null;
+    /** Toggle pills above the list; a tap flips `selected` then calls `onToggle`. Wraps to 2 columns past 2 toggles. */
+    export let toggles: OptionToggle[] = null;
+    export let onToggle: (toggle: OptionToggle) => void = null;
+    /** The component drawing a toggle: receives `icon`, `label`, `selected`, grid placement, and fires `tap`. */
+    export let togglePill: ComponentType = TogglePill;
     export let showFilter = false;
     export let showBorders = false;
     export let backgroundColor = null;
     export let borderRadius = 8;
     export let rowHeight = null;
+    /** Heights of the `separator` item (a hairline between two groups), of the `tiles` item (a wrapping grid) and of the `footer` item (one row of small buttons). */
+    export let separatorHeight = 12;
+    export let tilesHeight = 128;
+    export let footerHeight = 44;
+    /** Colour of the hairlines of the `separator`, `footer` and toggles; defaults to `colorOutlineVariant`. */
+    export let hairlineColor: string = null;
     export let autofocus = false;
     export let estimatedItemSize = true;
     export let autoSize = false;
@@ -74,6 +92,14 @@
     export let onChange: (item, value, e) => void = null;
     export let onRightIconTap: (item, e) => void = null;
     export let onLongPress: (item, e) => void = null;
+    /** For a row `component` that already calls `onLongPress(item, event)` itself: hands `onLongPress` through untouched. */
+    export let rowLongPressWithItem = false;
+    export let autoReloadItemOnLayout = false;
+    /** Extra attributes of the `checkbox` / `switch` views, applied last. */
+    export let checkboxProps: Partial<svelteNative.JSX.ViewAttributes> & { [k: string]: any } = {};
+    export let switchProps: Partial<svelteNative.JSX.ViewAttributes> & { [k: string]: any } = {};
+    /** Extra attributes for the row `component` of one item, by template type (`checkbox`, `switch`, ...). */
+    export let getRowProps: (item: OptionType, templateType: string) => Record<string, any> = null;
 
     export let titleProps: Partial<svelteNative.JSX.LabelAttributes> = {};
     export let titleHolderProps: Partial<svelteNative.JSX.StackLayoutAttributes> = {};
@@ -82,17 +108,26 @@
         [k: string]: Partial<svelteNative.JSX.ViewAttributes>;
     } = {};
 
-    export let component = autoSizeListItem ? ListItemAutoSize : ListItem;
+    export let component: ComponentType = autoSizeListItem ? ListItemAutoSize : ListItem;
     let filteredOptions: OptionType[] | ObservableArray<OptionType> = null;
     let collectionView: NativeViewElementNode<CollectionView>;
     let filter: string = null;
 
     // technique for only specific properties to get updated on store change
-    $: ({ colorOnSurface, colorOutline } = $colors);
+    $: ({ colorOnSurface, colorOnSurfaceVariant, colorOutline, colorOutlineVariant, colorPrimary } = $colors);
+    $: hairline = hairlineColor || colorOutlineVariant;
+
+    function getRowLongPress(item: OptionType): (...args) => void {
+        if (!onLongPress) {
+            return null;
+        }
+        return rowLongPressWithItem ? onLongPress : (event) => onLongPress(item, event);
+    }
 
     function updateFiltered(filter) {
         if (filter) {
-            filteredOptions = options.filter((d) => d.name.toLowerCase().indexOf(filter) !== -1);
+            const lowerFilter = filter.toLowerCase();
+            filteredOptions = options.filter((d) => (d.name || d.title || '').toLowerCase().includes(lowerFilter));
         } else {
             filteredOptions = options;
         }
@@ -225,6 +260,20 @@
     function blurTextField() {
         Utils.dismissSoftInput();
     }
+    function setFilter(value: string) {
+        filter = value;
+    }
+    function clearFilter() {
+        blurTextField();
+        filter = null;
+    }
+    function onCollectionLoaded(event: EventData) {
+        if (event.object instanceof CollectionView) {
+            event.object.setTemplateRowHeight('separator', separatorHeight);
+            event.object.setTemplateRowHeight('tiles', tilesHeight);
+            event.object.setTemplateRowHeight('footer', footerHeight);
+        }
+    }
 
     function itemTemplateSelector(item) {
         if (item.type) {
@@ -253,35 +302,56 @@
 <gesturerootview columns={containerColumns} rows="auto">
     <gridlayout {backgroundColor} {borderRadius} columns={`${width}`} {height} rows="auto,auto,*" {...$$restProps}>
         {#if title}
-            <label class="actionBarTitle" fontWeight="bold" margin="10 10 0 10" text={title} />
+            <slot name="header" {title}>
+                <label class="actionBarTitle" fontWeight="bold" margin="10 10 0 10" text={title} />
+            </slot>
         {/if}
         {#if showFilter}
-            <gridlayout borderColor={colorOutline} margin="10 10 0 10" row={1}>
-                <textfield
-                    autocapitalizationType="none"
-                    backgroundColor="transparent"
-                    hint={lc('search')}
-                    placeholder={lc('search')}
-                    returnKeyType="search"
-                    text={filter}
-                    variant="outline"
-                    verticalTextAlignment="center"
-                    on:loaded={onTextFieldLoaded}
-                    on:returnPress={blurTextField}
-                    on:textChange={(e) => (filter = e['value']?.toLowerCase())} />
+            <slot name="filter" {autofocus} {clearFilter} {filter} onLoaded={onTextFieldLoaded} onReturnPress={blurTextField} {setFilter}>
+                <gridlayout borderColor={colorOutline} margin="10 10 0 10" row={1}>
+                    <textfield
+                        autocapitalizationType="none"
+                        backgroundColor="transparent"
+                        hint={lc('search')}
+                        placeholder={lc('search')}
+                        returnKeyType="search"
+                        text={filter}
+                        variant="outline"
+                        verticalTextAlignment="center"
+                        on:loaded={onTextFieldLoaded}
+                        on:returnPress={blurTextField}
+                        on:textChange={(e) => setFilter(e['value'])} />
 
-                <IconButton
-                    col={1}
-                    gray={true}
-                    horizontalAlignment="right"
-                    isHidden={!filter || filter.length === 0}
-                    size={40}
-                    text="mdi-close"
-                    verticalAlignment="middle"
-                    on:tap={() => {
-                        blurTextField();
-                        filter = null;
-                    }} />
+                    <IconButton col={1} gray={true} horizontalAlignment="right" isHidden={!filter || filter.length === 0} size={40} text="mdi-close" verticalAlignment="middle" on:tap={clearFilter} />
+                </gridlayout>
+            </slot>
+        {/if}
+        {#if toggles?.length}
+            {@const toggleColumns = Math.min(toggles.length, 2)}
+            <gridlayout
+                borderBottomColor={hairline}
+                borderBottomWidth={1}
+                columns={Array(toggleColumns).fill('*').join(',')}
+                padding="6 4 8 4"
+                row={1}
+                rows={Array(Math.ceil(toggles.length / toggleColumns))
+                    .fill('auto')
+                    .join(',')}>
+                {#each toggles as toggle, index}
+                    <svelte:component
+                        this={togglePill}
+                        col={index % toggleColumns}
+                        horizontalAlignment="stretch"
+                        icon={toggle.icon}
+                        label={toggle.label}
+                        row={Math.floor(index / toggleColumns)}
+                        selected={toggle.selected}
+                        on:tap={() => {
+                            toggle.selected = !toggle.selected;
+                            toggles = toggles;
+                            onToggle?.(toggle);
+                        }} />
+                {/each}
             </gridlayout>
         {/if}
         <collectionView
@@ -294,6 +364,8 @@
             row={2}
             {rowHeight}
             on:dataPopulated={onDataPopulated}
+            on:loaded={onCollectionLoaded}
+            ios:autoReloadItemOnLayout={autoReloadItemOnLayout}
             ios:contentInsetAdjustmentBehavior={2}>
             <Template key="checkbox" let:item>
                 <svelte:component
@@ -309,8 +381,9 @@
                     {subtitleProps}
                     {titleHolderProps}
                     {titleProps}
+                    {...getRowProps?.(item, 'checkbox')}
                     {...templateProps}
-                    onLongPress={onLongPress ? (e) => onLongPress(item, e) : null}
+                    onLongPress={getRowLongPress(item)}
                     on:tap={(event) => onTap(item, event)}>
                     <checkbox
                         id="checkbox"
@@ -319,6 +392,7 @@
                         col={item.boxType === 'circle' ? 0 : 2}
                         ios:marginRight={10}
                         verticalAlignment="center"
+                        {...checkboxProps}
                         on:checkedChange={(e) => onCheckedChanged(item, e)} />
                 </svelte:component>
             </Template>
@@ -336,10 +410,11 @@
                     {subtitleProps}
                     {titleHolderProps}
                     {titleProps}
+                    {...getRowProps?.(item, 'switch')}
                     {...templateProps}
-                    onLongPress={onLongPress ? (e) => onLongPress(item, e) : null}
+                    onLongPress={getRowLongPress(item)}
                     on:tap={(event) => onTap(item, event)}>
-                    <switch id="checkbox" checked={item.value} col={1} marginLeft={10} on:checkedChange={(e) => onCheckedChanged(item, e)} />
+                    <switch id="checkbox" checked={item.value} col={1} marginLeft={10} {...switchProps} on:checkedChange={(e) => onCheckedChanged(item, e)} />
                 </svelte:component>
             </Template>
             <Template key="righticon" let:item>
@@ -355,8 +430,9 @@
                     {subtitleProps}
                     {titleHolderProps}
                     {titleProps}
+                    {...getRowProps?.(item, 'righticon')}
                     {...templateProps}
-                    onLongPress={onLongPress ? (e) => onLongPress(item, e) : null}
+                    onLongPress={getRowLongPress(item)}
                     on:tap={(event) => onTap(item, event)}>
                     <mdbutton class="icon-btn" col={1} text={item.rightIcon} variant="text" on:tap={(event) => onRightTap(item, event)} />
                 </svelte:component>
@@ -374,18 +450,21 @@
                     {subtitleProps}
                     {titleHolderProps}
                     {titleProps}
+                    {...getRowProps?.(item, 'lefticon')}
                     {...templateProps}
-                    onLongPress={onLongPress ? (e) => onLongPress(item, e) : null}
+                    onLongPress={getRowLongPress(item)}
                     on:tap={(event) => onTap(item, event)}>
-                    <label
-                        col={0}
-                        color={item.iconColor || colorOnSurface}
-                        fontFamily={item.iconFontFamily || $fonts.mdi}
-                        fontSize={(item.iconFontSize || iconFontSize) * $fontScale}
-                        paddingLeft="8"
-                        text={item.icon}
-                        verticalAlignment="center"
-                        width={iconFontSize * 2} />
+                    <slot name="lefticon" {item}>
+                        <label
+                            col={0}
+                            color={item.iconColor || colorOnSurface}
+                            fontFamily={item.iconFontFamily || $fonts.mdi}
+                            fontSize={(item.iconFontSize || iconFontSize) * $fontScale}
+                            paddingLeft="8"
+                            text={item.icon}
+                            verticalAlignment="center"
+                            width={iconFontSize * 2} />
+                    </slot>
                 </svelte:component>
             </Template>
             <Template key="image" let:item>
@@ -403,10 +482,13 @@
                     title={item.name}
                     {titleHolderProps}
                     {titleProps}
+                    {...getRowProps?.(item, 'image')}
                     {...templateProps}
-                    onLongPress={onLongPress ? (e) => onLongPress(item, e) : null}
+                    onLongPress={getRowLongPress(item)}
                     on:tap={(event) => onTap(item, event)}>
-                    <image borderRadius={4} col={0} colorMatrix={item.imageMatrix} marginBottom={5} marginRight={10} marginTop={5} src={item.image} />
+                    <slot name="image" {item}>
+                        <image borderRadius={4} col={0} colorMatrix={item.imageMatrix} marginBottom={5} marginRight={10} marginTop={5} src={item.image} />
+                    </slot>
                 </svelte:component>
             </Template>
             <Template key="checkbox_image" let:item>
@@ -424,8 +506,9 @@
                     title={item.name}
                     {titleHolderProps}
                     {titleProps}
+                    {...getRowProps?.(item, 'checkbox_image')}
                     {...templateProps}
-                    onLongPress={onLongPress ? (e) => onLongPress(item, e) : null}
+                    onLongPress={getRowLongPress(item)}
                     on:tap={(event) => onTap(item, event)}>
                     <checkbox
                         id="checkbox"
@@ -449,10 +532,56 @@
                     {subtitleProps}
                     {titleHolderProps}
                     {titleProps}
+                    {...getRowProps?.(item, 'default')}
                     {...templateProps}
-                    onLongPress={onLongPress ? (e) => onLongPress(item, e) : null}
+                    onLongPress={getRowLongPress(item)}
                     on:rightTap={(event) => onRightTap(item, event)}
                     on:tap={(event) => onTap(item, event)}></svelte:component>
+            </Template>
+            <Template key="tiles" let:item>
+                {@const tileColumns = item.columns ?? 3}
+                <gridlayout
+                    columns={Array(tileColumns).fill('*').join(',')}
+                    padding="2 8"
+                    rows={Array(Math.ceil(item.tiles.length / tileColumns))
+                        .fill('*')
+                        .join(',')}>
+                    {#each item.tiles as tile, index}
+                        <gridlayout
+                            col={index % tileColumns}
+                            horizontalAlignment="stretch"
+                            rippleColor={colorPrimary}
+                            row={Math.floor(index / tileColumns)}
+                            rows="*,auto"
+                            on:tap={() => close(tile)}
+                            on:longPress={(event) => onLongPress?.(tile, event)}>
+                            <label color={colorOnSurfaceVariant} fontFamily={$fonts.mdi} fontSize={24} text={tile.icon} textAlignment="center" verticalAlignment="bottom" />
+                            <label color={colorOnSurface} fontSize={12} lineBreak="end" maxLines={2} row={1} text={tile.title} textAlignment="center" verticalAlignment="top" />
+                        </gridlayout>
+                    {/each}
+                </gridlayout>
+            </Template>
+            <Template key="footer" let:item>
+                <gridlayout borderTopColor={hairline} borderTopWidth={1} columns={item.tiles.map(() => '*').join(',')} margin="0 8">
+                    {#each item.tiles as tile, index}
+                        <stacklayout
+                            col={index}
+                            horizontalAlignment="center"
+                            orientation="horizontal"
+                            rippleColor={colorPrimary}
+                            verticalAlignment="middle"
+                            on:tap={() => close(tile)}
+                            on:longPress={(event) => onLongPress?.(tile, event)}>
+                            <label color={colorOnSurfaceVariant} fontFamily={$fonts.mdi} fontSize={18} text={tile.icon} verticalAlignment="middle" />
+                            <label color={colorOnSurfaceVariant} fontSize={13} paddingLeft={6} text={tile.title} verticalAlignment="middle" />
+                        </stacklayout>
+                    {/each}
+                </gridlayout>
+            </Template>
+            <Template key="separator">
+                <gridlayout>
+                    <absolutelayout backgroundColor={hairline} height={1} margin="0 12" verticalAlignment="middle" />
+                </gridlayout>
             </Template>
             <slot name="templates" />
         </collectionView>
