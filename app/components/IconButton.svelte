@@ -6,6 +6,8 @@
     import { showToolTip } from '@shared/utils/ui';
 
     const iconPaints: { [k: string]: Paint } = {};
+    // sizes can be strings like '*' or '50%', which must go through untouched
+    const scaled = (value, scale: number) => (scale === 1 ? value : value * scale);
     const subtitlePaint = new Paint();
 </script>
 
@@ -24,6 +26,15 @@
     export let fontFamily = $fonts.mdi;
     export let selectedColor = white ? 'white' : undefined;
     export let color = null;
+    /** The colour of a `gray` or disabled button; the `colorOnSurfaceVariant` theme colour by default. */
+    export let grayColor = null;
+    /** The colour of a disabled button's glyph. */
+    export let disabledColor = 'lightgray';
+    export let selectedBackgroundColor = null;
+    /** The corner radius of a button that is not `rounded`; 10 on Android and the native one on iOS by default. */
+    export let borderRadius: number = null;
+    /** Multiplies the font size, width and height of the iOS button, which the system scales with the text size. */
+    export let sizeScale = 1;
     export let onLongPress: Function = null;
     export let fontSize = 0;
     export let subtitleFontSize = null;
@@ -38,7 +49,8 @@
 
     // let actualColor = null;
     // $: actualColor = white ? 'white' : !isEnabled || gray ? colorOnSurfaceVariant : color;
-    $: actualColor = !isEnabled ? colorOnSurfaceVariant : color || (white ? 'white' : !isEnabled || gray ? colorOnSurfaceVariant : colorOnSurface);
+    $: actualGrayColor = grayColor || colorOnSurfaceVariant;
+    $: actualColor = !isEnabled ? actualGrayColor : color || (white ? 'white' : !isEnabled || gray ? actualGrayColor : colorOnSurface);
     $: actualLongPress =
         onLongPress || tooltip
             ? (event) => {
@@ -50,12 +62,16 @@
               }
             : null;
     $: refresh(text);
-    $: refresh(color);
+    $: refresh(actualColor);
+    $: refresh(isSelected);
 
     function refresh(...args) {
         canvas?.nativeView?.redraw();
     }
     function onCanvasDraw({ canvas, object }: { canvas: Canvas; object: CanvasView }) {
+        if (!text && !subtitle) {
+            return;
+        }
         const theFontFamily = fontFamily || $fonts.mdi;
         let iconPaint = iconPaints[theFontFamily];
         if (!iconPaint) {
@@ -63,7 +79,7 @@
             iconPaint.fontFamily = theFontFamily;
         }
         iconPaint.textSize = fontSize ? fontSize : small ? 16 : 24;
-        iconPaint.color = isEnabled ? (isSelected ? selectedColor || colorPrimary : actualColor) : 'lightgray';
+        iconPaint.color = isEnabled ? (isSelected ? selectedColor || colorPrimary : actualColor) : disabledColor;
         const w = canvas.getWidth();
         const w2 = w / 2;
         const h2 = canvas.getHeight() / 2;
@@ -73,7 +89,7 @@
             canvas.translate(0, h2 - iconHeight);
             staticLayout.draw(canvas);
 
-            subtitlePaint.color = isEnabled ? actualColor : 'lightgray';
+            subtitlePaint.color = isEnabled ? actualColor : disabledColor;
             subtitlePaint.textSize = subtitleFontSize || (small ? 10 : 12);
             staticLayout = new StaticLayout(subtitle, subtitlePaint, w, LayoutAlignment.ALIGN_CENTER, 1, 0, true);
             canvas.translate(0, iconHeight);
@@ -90,7 +106,8 @@
     <canvasview
         bind:this={canvas}
         accessibilityLabel={tooltip}
-        borderRadius={shape === 'round' || (rounded && !shape) ? (height || size) / 2 : 10}
+        {...selectedBackgroundColor ? { backgroundColor: selectedBackgroundColor } : {}}
+        borderRadius={shape === 'round' || (rounded && !shape) ? (height || size) / 2 : (borderRadius ?? 10)}
         disableCss={true}
         height={height || size}
         isUserInteractionEnabled={isEnabled}
@@ -100,8 +117,7 @@
         {...$$restProps}
         on:draw={onCanvasDraw}
         on:tap
-        use:conditionalEvent={{ condition: !!actualLongPress, event: 'longPress', callback: actualLongPress }}
-    />
+        use:conditionalEvent={{ condition: !!actualLongPress, event: 'longPress', callback: actualLongPress }} />
 {:else}
     <mdbutton
         color={isSelected ? selectedColor : actualColor}
@@ -114,14 +130,16 @@
         shape={shape || (rounded ? 'round' : null)}
         {text}
         variant="text"
+        {...selectedBackgroundColor ? { backgroundColor: selectedBackgroundColor } : {}}
+        {...borderRadius && !(shape || rounded) ? { borderRadius } : {}}
         visibility={isVisible ? 'visible' : isHidden ? 'hidden' : 'collapse'}
         {...$$restProps}
         accessibilityLabel={tooltip}
-        fontSize={fontSize ? fontSize : small ? 16 : 24}
-        height={height || size}
-        width={width || size}
+        fontSize={scaled(fontSize ? fontSize : small ? 16 : 24, sizeScale)}
+        height={scaled(height || size, sizeScale)}
+        width={scaled(width || size, sizeScale)}
         on:tap
+        on:loaded
         on:longPress={actualLongPress}
-        use:conditionalEvent={{ condition: !!actualLongPress, event: 'longPress', callback: actualLongPress }}
-    />
+        use:conditionalEvent={{ condition: !!actualLongPress, event: 'longPress', callback: actualLongPress }} />
 {/if}

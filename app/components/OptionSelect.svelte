@@ -14,31 +14,13 @@
     import ListItem from '@shared/components/ListItem.svelte';
     import ListItemAutoSize from '@shared/components/ListItemAutoSize.svelte';
     import TogglePill from '@shared/components/TogglePill.svelte';
+    import type { IListItem } from '@shared/components/ListItem';
     import { type ComponentType, onDestroy } from 'svelte';
     import { NativeViewElementNode } from '@nativescript-community/svelte-native/dom';
     import { lc } from '~/helpers/locale';
     import { colors, fontScale, fonts } from '~/variables';
 
-    export interface IListItem {
-        showBottomLine?: boolean;
-        iconFontSize?: number;
-        subtitleFontSize?: number;
-        rightValue?: string | (() => string);
-        rightValueFontSize?: number;
-        fontSize?: number;
-        html?: any;
-        name?: string;
-        icon?: string;
-        color?: string | Color | ((item: IListItem) => string | Color);
-        rippleColor?: string | Color;
-        title?: string;
-        subtitle?: string;
-        type?: string;
-        onLinkTap?: (event) => void;
-        onLongPress?: (event) => void;
-        onDraw?: (item: IListItem, event: { canvas: Canvas; object: CanvasView }) => void;
-        [k: string]: any;
-    }
+    export type { IListItem };
     export interface OptionToggle {
         id: string;
         icon?: string;

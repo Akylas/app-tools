@@ -15,7 +15,15 @@
     export let buttonsDefaultVisualState = null;
     export let clazz: string = '';
     export let onGoBack: Function = null;
+    /** Called by the close button of a `modalWindow` instead of closing the modal. */
+    export let onClose: Function = null;
     export let onTitleTap: Function = null;
+    /** Adds the top window inset as a margin on Android; turn off to handle the inset with a `paddingTop`. */
+    export let useInsetMargin = true;
+    /** The `lineBreak` of the title; `null` leaves it alone. */
+    export let titleLineBreak: string = 'end';
+    /** Listens to taps, so they do not reach the views under the bar. */
+    export let blockTouches = false;
     let menuIcon: string;
     let menuIconVisible: boolean = false;
     let menuIconVisibility: CoreTypes.VisibilityType;
@@ -30,7 +38,11 @@
             if (onGoBack) {
                 onGoBack();
             } else if (modalWindow) {
-                closeModal(undefined);
+                if (onClose) {
+                    onClose();
+                } else {
+                    closeModal(undefined);
+                }
             } else {
                 goBack();
             }
@@ -50,12 +62,21 @@
     $: paddingLeft = menuIconVisible ? 0 : 16;
 </script>
 
-<gridlayout class={'actionBar ' + clazz} columns="auto,*, auto" paddingLeft={4} paddingRight={4} rows="*" {...$$restProps} transition:fade={{ duration: 300 }} android:marginTop={$windowInset.top}>
+<gridlayout
+    class={'actionBar ' + clazz}
+    columns="auto,*, auto"
+    paddingLeft={4}
+    paddingRight={4}
+    rows="*"
+    {...$$restProps}
+    use:conditionalEvent={{ condition: blockTouches, event: 'tap', callback: () => {} }}
+    transition:fade={{ duration: 300 }}
+    android:marginTop={useInsetMargin ? $windowInset.top : 0}>
     <label
         class={'actionBarTitle ' + clazz}
         autoFontSize={true}
         col={1}
-        lineBreak="end"
+        {...titleLineBreak ? { lineBreak: titleLineBreak } : {}}
         maxLines={2}
         paddingLeft={menuIconVisible ? 0 : 16}
         text={title || ''}
@@ -73,4 +94,5 @@
         <slot />
     </stacklayout>
     <slot name="center" col={1} />
+    <slot name="bottom" />
 </gridlayout>
