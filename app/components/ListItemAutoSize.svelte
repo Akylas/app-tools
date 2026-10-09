@@ -2,7 +2,7 @@
     import { Canvas, CanvasView, Paint } from '@nativescript-community/ui-canvas';
     import { conditionalEvent, createEventDispatcher } from '@shared/utils/svelte/ui';
     import { colors, fontScale } from '~/variables';
-    import type { IListItem } from './OptionSelect.svelte';
+    import type { IListItem } from './ListItem';
     const linePaint = new Paint();
     linePaint.strokeWidth = 1;
 </script>

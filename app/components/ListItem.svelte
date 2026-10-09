@@ -2,7 +2,7 @@
     import { Canvas, CanvasView } from '@nativescript-community/ui-canvas';
     import { conditionalEvent } from '@shared/utils/svelte/ui';
     import { colors, fontScale, fonts } from '~/variables';
-    import { IListItem } from './OptionSelect.svelte';
+    import type { IListItem } from './ListItem';
 </script>
 
 <script lang="ts">
