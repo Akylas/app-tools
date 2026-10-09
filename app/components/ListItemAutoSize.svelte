@@ -24,8 +24,13 @@
     export let subtitleFontSize: number = 15;
     export let columns: string = '*,auto';
     export let mainCol = 0;
+    export let extraPaddingLeft = 0;
+    /** Multiplies the title font size into its line height; `null` leaves the line height alone. */
+    export let lineHeightFactor: number = 1.3;
     export let onLinkTap: (event) => void = null;
-    export let onLongPress: (event) => void = null;
+    export let onLongPress: (...args) => void = null;
+    /** Calls `onLongPress(item, event)` and ignores `item.onLongPress`, instead of `(item.onLongPress || onLongPress)(event)`. */
+    export let longPressWithItem = false;
     export let onDraw: (item: IListItem, event: { canvas: Canvas; object: CanvasView }) => void = null;
 
     function draw(event: { canvas: Canvas; object: CanvasView }) {
@@ -80,9 +85,12 @@
     rippleColor={color || colorPrimary}
     on:tap={(event) => dispatch('tap', event)}
     on:draw={draw}
-    use:conditionalEvent={{ condition: !!(item.onLongPress || onLongPress), event: 'longPress', callback: item.onLongPress || onLongPress }}
-    {...$$restProps}
->
+    use:conditionalEvent={{
+        condition: longPressWithItem ? !!onLongPress : !!(item.onLongPress || onLongPress),
+        event: 'longPress',
+        callback: longPressWithItem ? (event) => onLongPress(item, event) : item.onLongPress || onLongPress
+    }}
+    {...$$restProps}>
     <!-- <label
         fontFamily={leftIconFonFamily}
         fontSize={iconFontSize}
@@ -91,6 +99,8 @@
         verticalAlignment="middle"
         visibility={!!leftIcon ? 'visible' : 'collapse'}
         width={iconFontSize * 2} /> -->
+    <!-- before the labels, so it draws under them -->
+    <slot name="leading" />
     <label
         col={mainCol}
         color={item.titleColor || color || colorOnSurface}
@@ -99,27 +109,27 @@
         html={item.html}
         paddingBottom={addedPadding}
         paddingTop={addedPadding}
+        {...extraPaddingLeft ? { paddingLeft: extraPaddingLeft } : {}}
         text={item.text}
         textWrap={true}
         verticalTextAlignment="center"
         {...item.titleProps || $$restProps?.titleProps}
-        use:conditionalEvent={{ condition: !!(item.onLinkTap || onLinkTap), event: 'linkTap', callback: item.onLinkTap || onLinkTap }}
-    >
-        <cspan fontSize={fontSize * $fontScale} lineHeight={fontSize * $fontScale * 1.3} text={item.title || item.name} />
+        use:conditionalEvent={{ condition: !!(item.onLinkTap || onLinkTap), event: 'linkTap', callback: item.onLinkTap || onLinkTap }}>
+        <cspan fontSize={fontSize * $fontScale} {...lineHeightFactor ? { lineHeight: fontSize * $fontScale * lineHeightFactor } : {}} text={item.title || item.name} />
         <cspan color={item.subtitleColor || colorOnSurfaceVariant} fontSize={(item.subtitleFontSize || subtitleFontSize) * $fontScale} text={item.subtitle ? '\n' + item.subtitle : null} />
     </label>
 
     <label
-        col={1}
+        col={mainCol + 1}
         color={item.subtitleColor}
         disableCss={true}
         fontSize={(item.rightValueFontSize || subtitleFontSize) * $fontScale}
         marginLeft={16}
+        {...extraPaddingLeft ? { paddingLeft: extraPaddingLeft } : {}}
         text={typeof item.rightValue === 'function' ? item.rightValue() : item.rightValue}
         textAlignment="right"
         verticalAlignment="middle"
         visibility={!!item.rightValue ? 'visible' : 'collapse'}
-        on:tap={(event) => dispatch('rightIconTap', event)}
-    />
+        on:tap={(event) => dispatch('rightIconTap', event)} />
     <slot />
 </canvasview>
