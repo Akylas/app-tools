@@ -52,6 +52,11 @@
     export let separatorHeight = 12;
     export let tilesHeight = 128;
     export let footerHeight = 44;
+    /** A `tiles` icon on a rounded square of this colour (and size, radius); none keeps the bare icon. */
+    export let tileIconBackground: string = null;
+    export let tileIconColor: string = null;
+    export let tileIconSize = 40;
+    export let tileIconRadius = 12;
     /** Colour of the hairlines of the `separator`, `footer` and toggles; defaults to `colorOutlineVariant`. */
     export let hairlineColor: string = null;
     export let autofocus = false;
@@ -537,8 +542,20 @@
                             rows="*,auto"
                             on:tap={() => close(tile)}
                             on:longPress={(event) => onLongPress?.(tile, event)}>
-                            <label color={colorOnSurfaceVariant} fontFamily={$fonts.mdi} fontSize={24} text={tile.icon} textAlignment="center" verticalAlignment="bottom" />
-                            <label color={colorOnSurface} fontSize={12} lineBreak="end" maxLines={2} row={1} text={tile.title} textAlignment="center" verticalAlignment="top" />
+                            <label
+                                backgroundColor={tileIconBackground}
+                                borderRadius={tileIconRadius}
+                                color={tileIconColor || colorOnSurfaceVariant}
+                                fontFamily={$fonts.mdi}
+                                fontSize={24}
+                                height={tileIconBackground ? tileIconSize : null}
+                                horizontalAlignment="center"
+                                text={tile.icon}
+                                textAlignment="center"
+                                verticalAlignment="bottom"
+                                verticalTextAlignment="center"
+                                width={tileIconBackground ? tileIconSize : null} />
+                            <label color={colorOnSurface} fontSize={12} lineBreak="end" maxLines={2} paddingTop={4} row={1} text={tile.title} textAlignment="center" verticalAlignment="top" />
                         </gridlayout>
                     {/each}
                 </gridlayout>
