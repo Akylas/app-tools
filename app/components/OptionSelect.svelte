@@ -92,7 +92,8 @@
 
     function updateFiltered(filter) {
         if (filter) {
-            filteredOptions = options.filter((d) => d.name.toLowerCase().indexOf(filter) !== -1);
+            const lowerFilter = filter.toLowerCase();
+            filteredOptions = options.filter((d) => (d.name || d.title || '').toLowerCase().includes(lowerFilter));
         } else {
             filteredOptions = options;
         }
