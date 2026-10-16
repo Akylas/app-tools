@@ -1,5 +1,11 @@
 <script context="module" lang="ts">
     import { colors } from '~/variables';
+
+    // iOS: the native popover draws the background, radius and shadow, so none of them may be drawn again
+    const NATIVE_CHROME_PROPS = ['backgroundColor', 'borderColor', 'borderRadius', 'borderWidth', 'elevation', 'margin'];
+    function withoutNativeChrome(props: Record<string, any>) {
+        return Object.fromEntries(Object.entries(props).filter(([key]) => !NATIVE_CHROME_PROPS.includes(key)));
+    }
 </script>
 
 <script lang="ts">
@@ -8,7 +14,7 @@
     $: ({ colorSurfaceContainer } = $colors);
     export let flat = false;
     export let backgroundColor = colorSurfaceContainer;
-    $: containerProps = { backgroundColor, borderRadius: 10, elevation: __IOS__ ? 0 : 4, margin: 4, padding: '0 10 0 10', ...$$restProps };
+    $: containerProps = __IOS__ ? { padding: '0 10 0 10', ...withoutNativeChrome($$restProps) } : { backgroundColor, borderRadius: 10, elevation: 4, margin: 4, padding: '0 10 0 10', ...$$restProps };
 </script>
 
 <gesturerootview columns="auto" rows="auto">
