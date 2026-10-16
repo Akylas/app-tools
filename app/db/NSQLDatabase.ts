@@ -1,9 +1,8 @@
 import SqlQuery from 'kiss-orm/dist/Queries/SqlQuery';
 import DatabaseInterface from 'kiss-orm/dist/Databases/DatabaseInterface';
 import migrate from 'kiss-orm/dist/Databases/Common/migrate';
-import { SQLiteDatabase, openOrCreate, wrapDb } from '@nativescript-community/sqlite';
+import { DatabaseOptions, SQLiteDatabase, openOrCreate } from '@nativescript-community/sqlite-core';
 import { NoSpaceLeftError } from '@akylas/nativescript-app-utils/error';
-import { DatabaseOptions } from '@nativescript-community/sqlite/sqlite.common';
 
 function formatIdentifier(i: string): string {
     return i;
@@ -11,12 +10,9 @@ function formatIdentifier(i: string): string {
 
 export default class NSQLDatabase implements DatabaseInterface {
     db: SQLiteDatabase;
-    constructor(filePathOrDb: any, options?: DatabaseOptions) {
-        if (typeof filePathOrDb === 'string') {
-            this.db = openOrCreate(filePathOrDb, options);
-        } else {
-            this.db = wrapDb(filePathOrDb, options);
-        }
+    constructor(filePath: string, options?: DatabaseOptions) {
+        // opens in the background: an open error is reported by the first query
+        this.db = openOrCreate(filePath, options);
     }
 
     async disconnect(): Promise<void> {
@@ -31,7 +27,8 @@ export default class NSQLDatabase implements DatabaseInterface {
     }
 
     wrapAndThrowError(error) {
-        if (/SQLITE_IOERR_FSYNC|ENOSPC/.test(error)) {
+        // SQLITE_FULL (13), SQLITE_IOERR_FSYNC (1034), or the OS message
+        if (error && (error.code === 13 || error.extendedCode === 1034 || /SQLITE_IOERR_FSYNC|ENOSPC|disk is full/.test(String(error)))) {
             throw new NoSpaceLeftError(error);
         } else {
             throw error;
@@ -60,19 +57,23 @@ export default class NSQLDatabase implements DatabaseInterface {
         const compiledQuery = standardInsertQuery.compile(this.indexToPlaceholder, formatIdentifier);
         const sqlQuery = compiledQuery.sql.trim();
         try {
-            let result = await this.db.execute(sqlQuery, compiledQuery.params);
-            // console.info('insertAndGet', sqlQuery, compiledQuery.params, result);
-            if (!result) {
-                // create await an array result.
-                result = [undefined];
-            }
-            return result as any[];
+            await this.db.execute(sqlQuery, compiledQuery.params);
+            // no id: kiss-orm then builds the model from the inserted attributes (the primary key is not always the rowid)
+            return [undefined];
         } catch (error) {
             this.wrapAndThrowError(error);
         }
     }
 
     async updateAndGet(standardUpdateQuery: SqlQuery): Promise<null | any[]> {
-        return this.insertAndGet(standardUpdateQuery);
+        const compiledQuery = standardUpdateQuery.compile(this.indexToPlaceholder, formatIdentifier);
+        const sqlQuery = compiledQuery.sql.trim();
+        try {
+            await this.db.execute(sqlQuery, compiledQuery.params);
+            // null: kiss-orm then selects the updated row itself
+            return null;
+        } catch (error) {
+            this.wrapAndThrowError(error);
+        }
     }
 }
