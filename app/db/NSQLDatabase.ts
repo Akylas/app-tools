@@ -39,7 +39,7 @@ export default class NSQLDatabase implements DatabaseInterface {
         const compiledQuery = query.compile(this.indexToPlaceholder, formatIdentifier);
         const sqlQuery = compiledQuery.sql.trim();
         try {
-            const result = await this.db.select(sqlQuery, compiledQuery.params);
+            const result = await this.db.select(sqlQuery, [...compiledQuery.params]);
             return result as any[];
         } catch (error) {
             this.wrapAndThrowError(error);
@@ -57,7 +57,7 @@ export default class NSQLDatabase implements DatabaseInterface {
         const compiledQuery = standardInsertQuery.compile(this.indexToPlaceholder, formatIdentifier);
         const sqlQuery = compiledQuery.sql.trim();
         try {
-            await this.db.execute(sqlQuery, compiledQuery.params);
+            await this.db.execute(sqlQuery, [...compiledQuery.params]);
             // no id: kiss-orm then builds the model from the inserted attributes (the primary key is not always the rowid)
             return [undefined];
         } catch (error) {
@@ -69,7 +69,7 @@ export default class NSQLDatabase implements DatabaseInterface {
         const compiledQuery = standardUpdateQuery.compile(this.indexToPlaceholder, formatIdentifier);
         const sqlQuery = compiledQuery.sql.trim();
         try {
-            await this.db.execute(sqlQuery, compiledQuery.params);
+            await this.db.execute(sqlQuery, [...compiledQuery.params]);
             // null: kiss-orm then selects the updated row itself
             return null;
         } catch (error) {
