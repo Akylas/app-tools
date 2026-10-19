@@ -1,5 +1,5 @@
 <script context="module" lang="ts">
-    import { TextField } from '@nativescript-community/ui-material-textfield';
+    import { TextField } from '@nativescript-community/ui-textfield';
     import { Utils } from '@nativescript/core';
     import { onDestroy } from 'svelte';
     import { NativeViewElementNode } from '@nativescript-community/svelte-native/dom';

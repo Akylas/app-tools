@@ -1,7 +1,7 @@
 import { AppUtilsAndroid, restartApp } from '@akylas/nativescript-app-utils';
 import Theme from '@nativescript-community/css-theme';
 import { lc } from '@nativescript-community/l';
-import { confirm } from '@nativescript-community/ui-material-dialogs';
+import { confirm } from '@nativescript-community/ui-dialogs';
 import { closePopover } from '@nativescript-community/ui-popover/svelte';
 import { Application, ApplicationEventData, ApplicationSettings, SystemAppearanceChangedEventData, Utils } from '@nativescript/core';
 import { getBoolean, getString, setString } from '@nativescript/core/application-settings';

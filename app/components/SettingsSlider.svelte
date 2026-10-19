@@ -4,8 +4,8 @@
     import { Paint } from '@nativescript-community/ui-canvas';
     import { showError } from '@shared/utils/showError';
     import { colors, fontScale, fonts } from '~/variables';
-    import { TextFieldProperties } from '@nativescript-community/ui-material-textfield';
-    import { prompt } from '@nativescript-community/ui-material-dialogs';
+    import { TextFieldProperties } from '@nativescript-community/ui-textfield';
+    import { prompt } from '@nativescript-community/ui-dialogs';
     import { l } from '~/helpers/locale';
     import { Utils } from '@nativescript/core';
     import IconButton from '@shared/components/IconButton.svelte';

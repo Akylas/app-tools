@@ -7,7 +7,7 @@
     import { CollectionView } from '@nativescript-community/ui-collectionview';
     import { openFilePicker } from '@nativescript-community/ui-document-picker';
     import { closeBottomSheet } from '@nativescript-community/ui-bottomsheet/svelte';
-    import { TextField } from '@nativescript-community/ui-material-textfield';
+    import { TextField } from '@nativescript-community/ui-textfield';
     import { EventData, File, ObservableArray, Utils, View } from '@nativescript/core';
     import { debounce } from '@nativescript/core/utils';
     import IconButton from '@shared/components/IconButton.svelte';

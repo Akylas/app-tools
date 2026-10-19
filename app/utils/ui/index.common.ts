@@ -1,8 +1,8 @@
 import { InAppBrowser } from '@akylas/nativescript-inappbrowser';
 import { lc } from '@nativescript-community/l';
 import { NativeViewElementNode, createElement } from '@nativescript-community/svelte-native/dom';
-import { AlertDialog, MDCAlertControlerOptions, alert } from '@nativescript-community/ui-material-dialogs';
-import { SnackBarOptions, showSnack as mdShowSnack } from '@nativescript-community/ui-material-snackbar';
+import { AlertDialog, MDCAlertControlerOptions, alert } from '@nativescript-community/ui-dialogs';
+import { SnackBarOptions, showSnack as mdShowSnack } from '@nativescript-community/ui-snackbar';
 import { HorizontalPosition, VerticalPosition } from '@nativescript-community/ui-popover';
 import { showPopover } from '@nativescript-community/ui-popover/svelte';
 import { type GridLayout, Utils, type View, type ViewBase } from '@nativescript/core';
