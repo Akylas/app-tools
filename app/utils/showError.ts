@@ -1,7 +1,7 @@
 import { CustomError } from '@akylas/nativescript-app-utils/error';
 import { l, lc } from '@nativescript-community/l';
 import { Label } from '@nativescript-community/ui-label';
-import { MDCAlertControlerOptions, alert as mdAlert } from '@nativescript-community/ui-material-dialogs';
+import { MDCAlertControlerOptions, alert as mdAlert } from '@nativescript-community/ui-dialogs';
 import { AlertOptions } from '@nativescript/core';
 import { wrapNativeException } from '@nativescript/core/utils';
 import { Sentry, isSentryEnabled } from '@shared/utils/sentry';

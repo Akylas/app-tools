@@ -5,7 +5,7 @@
     import { CheckBox } from '@nativescript-community/ui-checkbox';
     import { CollectionView } from '@nativescript-community/ui-collectionview';
     import { Label } from '@nativescript-community/ui-label';
-    import { prompt } from '@nativescript-community/ui-material-dialogs';
+    import { prompt } from '@nativescript-community/ui-dialogs';
     import { ApplicationSettings, ObservableArray, Page, Utils, View } from '@nativescript/core';
     import ActionBarSearch from '@shared/components/ActionBarSearch.svelte';
     import CActionBar from '@shared/components/CActionBar.svelte';
