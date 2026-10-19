@@ -1,5 +1,5 @@
 import { BuyItemOptions, Item as InAppItem, InAppPurchase, PaymentEvent } from '@akylas/nativescript-inapp-purchase/index';
-import { showBottomSheet } from '@nativescript-community/ui-material-bottomsheet/svelte';
+import { showBottomSheet } from '@nativescript-community/ui-bottomsheet/svelte';
 import { showError } from './showError';
 import { lc } from '@nativescript-community/l';
 
