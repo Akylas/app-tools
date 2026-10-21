@@ -52,7 +52,7 @@
     DEV_LOG && console.log('ColorPicker', modes, mode);
 
     const tabs = [
-        { id: 'grid', title: lc('grid') },
+        { id: 'grid', title: lc('color_grid') },
         { id: 'spectrum', title: lc('spectrum') },
         { id: 'hue', title: lc('hue') },
         { id: 'sliders', title: lc('sliders') }
