@@ -539,7 +539,8 @@
                             horizontalAlignment="stretch"
                             rippleColor={colorPrimary}
                             row={Math.floor(index / tileColumns)}
-                            rows="*,auto"
+                            paddingTop={8}
+                            rows="auto,*"
                             on:tap={() => close(tile)}
                             on:longPress={(event) => onLongPress?.(tile, event)}>
                             <label
@@ -552,7 +553,7 @@
                                 horizontalAlignment="center"
                                 text={tile.icon}
                                 textAlignment="center"
-                                verticalAlignment="bottom"
+                                verticalAlignment="top"
                                 verticalTextAlignment="center"
                                 width={tileIconBackground ? tileIconSize : null} />
                             <label color={colorOnSurface} fontSize={12} lineBreak="end" maxLines={2} paddingTop={4} row={1} text={tile.title} textAlignment="center" verticalAlignment="top" />
