@@ -33,6 +33,7 @@
 <script lang="ts">
     import { Pager } from '@nativescript-community/ui-pager';
     import { chunk } from '@shared/utils/batch';
+    import { formatHex, hsvToRgb, parseHex, rgbToHsv } from '@shared/utils/color';
 
     let { colorBackground, colorError, colorOnBackground, colorOnSurface, colorOnSurfaceVariant, colorOutline, colorOutlineVariant, colorSurface, colorSurfaceContainerHigh, colorTertiary } = $colors;
     $: ({ colorBackground, colorError, colorOnBackground, colorOnSurface, colorOnSurfaceVariant, colorOutline, colorOutlineVariant, colorSurface, colorSurfaceContainerHigh, colorTertiary } = $colors);
@@ -71,6 +72,8 @@
     export let color: Color | string = 'red';
     export let alphaSupport = true;
     let currentColor: Color = color instanceof Color ? color : new Color(color);
+    let hexText = currentColor.hex;
+    let hexInvalid = false;
 
     let hsva: HSVA = {
         h: 210,
@@ -84,6 +87,8 @@
     let savedPerPage = Math.floor((screenWidthDips - 60) / (2 * SAVED_THUMB_RADIUS)) * 2;
     $: pagedSavedColors = chunk(saved.concat('add'), savedPerPage);
 
+    $: channelValues = hsvToRgb(hsva.h, hsva.s, hsva.v);
+
     function clamp(v, min, max) {
         return Math.max(min, Math.min(max, v));
     }
@@ -92,78 +97,38 @@
         savedPerPage = Math.floor((screenWidthDips - 60) / (2 * SAVED_THUMB_RADIUS)) * 2;
     });
 
-    function hsvToRgb(h, s, v) {
-        const c = v * s;
-        const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
-        const m = v - c;
-
-        let r = 0,
-            g = 0,
-            b = 0;
-
-        if (h < 60) [r, g, b] = [c, x, 0];
-        else if (h < 120) [r, g, b] = [x, c, 0];
-        else if (h < 180) [r, g, b] = [0, c, x];
-        else if (h < 240) [r, g, b] = [0, x, c];
-        else if (h < 300) [r, g, b] = [x, 0, c];
-        else [r, g, b] = [c, 0, x];
-
-        return {
-            r: Math.round((r + m) * 255),
-            g: Math.round((g + m) * 255),
-            b: Math.round((b + m) * 255)
-        };
-    }
-
-    function rgbToHsv(r, g, b) {
-        r /= 255;
-        g /= 255;
-        b /= 255;
-
-        const max = Math.max(r, g, b);
-        const min = Math.min(r, g, b);
-
-        let h = 0;
-        const v = max;
-        const d = max - min;
-
-        const s = max === 0 ? 0 : d / max;
-
-        if (max !== min) {
-            switch (max) {
-                case r:
-                    h = (g - b) / d + (g < b ? 6 : 0);
-                    break;
-                case g:
-                    h = (b - r) / d + 2;
-                    break;
-                case b:
-                    h = (r - g) / d + 4;
-                    break;
-            }
-            h /= 6;
-        }
-
-        return { h: h * 360, s, v };
-    }
-
-    function rgbaToHex(r, g, b, a) {
-        const toHex = (c) => c.toString(16).padStart(2, '0');
-        return '#' + toHex(r) + toHex(g) + toHex(b) + toHex(Math.round(a * 255));
-    }
-
     function currentRgb(value = hsva) {
         return hsvToRgb(hsva.h, hsva.s, hsva.v);
     }
 
     function hsvaToHex(value = hsva) {
         const rgb = currentRgb(value);
-        return rgbaToHex(rgb.r, rgb.g, rgb.b, hsva.a);
+        return formatHex(rgb, hsva.a);
     }
 
-    function updateHex() {
+    function updateHex(syncText = true) {
         currentColor = new Color(hsvaToHex());
+        if (syncText) {
+            hexText = currentColor.hex;
+            hexInvalid = false;
+        }
         invalidateAll();
+    }
+
+    function onHexChange(event) {
+        const text: string = event.value ?? '';
+        if (text.trim().toUpperCase() === currentColor.hex) {
+            hexInvalid = false;
+            return;
+        }
+        const parsed = parseHex(text);
+        hexInvalid = !parsed;
+        if (!parsed) {
+            return;
+        }
+        const hsv = rgbToHsv(parsed.r, parsed.g, parsed.b);
+        hsva = { h: hsv.h, s: hsv.s, v: hsv.v, a: alphaSupport ? parsed.a : hsva.a };
+        updateHex(false);
     }
 
     function updateFromHex() {
@@ -194,6 +159,8 @@
             a
         };
 
+        hexText = currentColor.hex;
+        hexInvalid = false;
         invalidateAll();
     }
 
@@ -608,8 +575,12 @@
 
         const t = clamp(args.getX(), 0, w) / w;
 
+        setRgbChannel(channel, Math.round(t * 255));
+    }
+
+    function setRgbChannel(channel: 'r' | 'g' | 'b', value: number) {
         const rgb = currentRgb();
-        rgb[channel] = Math.round(t * 255);
+        rgb[channel] = value;
 
         const hsv = rgbToHsv(rgb.r, rgb.g, rgb.b);
 
@@ -618,6 +589,14 @@
         hsva.v = hsv.v;
 
         updateHex();
+    }
+
+    function onChannelTextChange(channel: 'r' | 'g' | 'b', event) {
+        const value = parseInt(event.value, 10);
+        if (isNaN(value) || value === currentRgb()[channel]) {
+            return;
+        }
+        setRgbChannel(channel, clamp(value, 0, 255));
     }
 
     /* ----------------------------
@@ -760,11 +739,47 @@
             {#if mode === 'sliders'}
                 <stacklayout verticalAlignment="center">
                     <label class="header" text={lu('red')} />
-                    <canvasview bind:this={redCanvas} height={SLIDER_HEIGHT} on:draw={(e) => drawRgbSlider(e, 'r')} on:touch={(e) => setRgb('r', e)} />
+                    <gridlayout columns="*,auto">
+                        <canvasview bind:this={redCanvas} height={SLIDER_HEIGHT} on:draw={(e) => drawRgbSlider(e, 'r')} on:touch={(e) => setRgb('r', e)} />
+                        <textfield
+                            col={1}
+                            keyboardType="number"
+                            marginLeft={10}
+                            maxLength={3}
+                            text={channelValues.r.toString()}
+                            variant="outline"
+                            width={70}
+                            on:textChange={(event) => onChannelTextChange('r', event)}
+                        />
+                    </gridlayout>
                     <label class="header" text={lu('green')} />
-                    <canvasview bind:this={greenCanvas} height={SLIDER_HEIGHT} on:draw={(e) => drawRgbSlider(e, 'g')} on:touch={(e) => setRgb('g', e)} />
+                    <gridlayout columns="*,auto">
+                        <canvasview bind:this={greenCanvas} height={SLIDER_HEIGHT} on:draw={(e) => drawRgbSlider(e, 'g')} on:touch={(e) => setRgb('g', e)} />
+                        <textfield
+                            col={1}
+                            keyboardType="number"
+                            marginLeft={10}
+                            maxLength={3}
+                            text={channelValues.g.toString()}
+                            variant="outline"
+                            width={70}
+                            on:textChange={(event) => onChannelTextChange('g', event)}
+                        />
+                    </gridlayout>
                     <label class="header" text={lu('blue')} />
-                    <canvasview bind:this={blueCanvas} height={SLIDER_HEIGHT} on:draw={(e) => drawRgbSlider(e, 'b')} on:touch={(e) => setRgb('b', e)} />
+                    <gridlayout columns="*,auto">
+                        <canvasview bind:this={blueCanvas} height={SLIDER_HEIGHT} on:draw={(e) => drawRgbSlider(e, 'b')} on:touch={(e) => setRgb('b', e)} />
+                        <textfield
+                            col={1}
+                            keyboardType="number"
+                            marginLeft={10}
+                            maxLength={3}
+                            text={channelValues.b.toString()}
+                            variant="outline"
+                            width={70}
+                            on:textChange={(event) => onChannelTextChange('b', event)}
+                        />
+                    </gridlayout>
                 </stacklayout>
             {/if}
         </gridlayout>
@@ -804,14 +819,7 @@
         </gridlayout>
         <stacklayout row={5}>
             <gridlayout columns="*,auto">
-                <textfield
-                    hint={lc('color_hex_hint')}
-                    text={currentColor.hex.slice(1, 7)}
-                    variant="outline"
-                    on:returnPress={(e) => {
-                        selectColor('#' + e.object.text);
-                    }}
-                />
+                <textfield error={hexInvalid ? lc('invalid_color') : null} hint={lc('color_hex_hint')} text={hexText} variant="outline" on:textChange={onHexChange} />
 
                 <mdbutton col={1} text={lc('select')} verticalAlignment="center" on:tap={(e) => closeBottomSheet(currentColor)} />
             </gridlayout>
