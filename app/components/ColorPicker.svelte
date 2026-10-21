@@ -1,16 +1,7 @@
-<style lang="scss">
-    .header {
-        color: var(--colorOnBackground);
-        font-weight: bold;
-        font-size: 15;
-        padding: 10 0 4 0;
-    }
-</style>
-
 <script context="module" lang="ts">
     import { ApplicationSettings, Color, TapGestureEventData, Utils } from '@nativescript/core';
 
-    import { Align, Canvas, LinearGradient, Paint, RectF, Style, TileMode } from '@nativescript-community/ui-canvas';
+    import { Align, Canvas, LinearGradient, Paint, Path, RectF, Style, TileMode } from '@nativescript-community/ui-canvas';
 
     import { lc, lu } from '@nativescript-community/l';
     import { Template } from '@nativescript-community/svelte-native/components';
@@ -22,6 +13,10 @@
     const THUMB_RADIUS = 14;
     const MAIN_COLOR_SIZE = 70;
     const SAVED_THUMB_RADIUS = MAIN_COLOR_SIZE / 2 / 2;
+    // keeps sliders out of the system back-gesture zones at the screen edges
+    const HORIZONTAL_PADDING = 32;
+    const CHECKER_LIGHT = '#ffffff';
+    const CHECKER_DARK = '#cccccc';
     const paint = new Paint();
     const strokePaint = new Paint();
     strokePaint.setStyle(Style.STROKE);
@@ -84,7 +79,8 @@
     updateFromHex();
 
     let saved: string[] = JSON.parse(ApplicationSettings.getString(SETTINGS_COLORS_SAVED, '["black","blue", "green", "orange", "red", "pink"]'));
-    let savedPerPage = Math.floor((screenWidthDips - 60) / (2 * SAVED_THUMB_RADIUS)) * 2;
+    let savedPerPage = Math.floor((screenWidthDips - 28 - 2 * HORIZONTAL_PADDING) / (2 * SAVED_THUMB_RADIUS)) * 2;
+    $: headerProps = { color: colorOnSurfaceVariant, fontSize: 15, fontWeight: 'bold', padding: '10 0 4 0' };
     $: pagedSavedColors = chunk(saved.concat('add'), savedPerPage);
 
     $: channelValues = hsvToRgb(hsva.h, hsva.s, hsva.v);
@@ -94,7 +90,7 @@
     }
 
     onMount(() => {
-        savedPerPage = Math.floor((screenWidthDips - 60) / (2 * SAVED_THUMB_RADIUS)) * 2;
+        savedPerPage = Math.floor((screenWidthDips - 28 - 2 * HORIZONTAL_PADDING) / (2 * SAVED_THUMB_RADIUS)) * 2;
     });
 
     function currentRgb(value = hsva) {
@@ -603,6 +599,29 @@
         ALPHA SLIDER
     ---------------------------- */
 
+    // transparency checkerboard, clipped to the pill shape of the slider
+    function drawCheckerboard(canvas: Canvas, width: number, height: number) {
+        const cellSize = height / 4;
+        const pill = new Path();
+        pill.arcTo(new RectF(0, 0, height, height), 90, 180, true);
+        pill.arcTo(new RectF(width - height, 0, width, height), 270, 180);
+        pill.close();
+
+        canvas.save();
+        canvas.clipPath(pill);
+        paint.setShader(null);
+        paint.setStyle(Style.FILL);
+        paint.setColor(CHECKER_LIGHT);
+        canvas.drawRect(new RectF(0, 0, width, height), paint);
+        paint.setColor(CHECKER_DARK);
+        for (let row = 0; row < 4; row++) {
+            for (let column = row % 2; column * cellSize < width; column += 2) {
+                canvas.drawRect(new RectF(column * cellSize, row * cellSize, (column + 1) * cellSize, (row + 1) * cellSize), paint);
+            }
+        }
+        canvas.restore();
+    }
+
     function drawAlphaSlider(args) {
         const canvas = args.canvas;
         const width = canvas.getWidth();
@@ -613,6 +632,7 @@
 
         const gradient = new LinearGradient(0, 0, width, 0, [new Color(`rgba(${rgb.r},${rgb.g},${rgb.b},0)`), new Color(`rgba(${rgb.r},${rgb.g},${rgb.b},1)`)], null, TileMode.CLAMP);
 
+        drawCheckerboard(canvas, width, height);
         paint.setShader(gradient);
         canvas.drawRoundRect(new RectF(0, 0, width, height), SLIDER_HEIGHT / 2, SLIDER_HEIGHT / 2, paint);
 
@@ -713,7 +733,7 @@
     <!-- <CActionBar title="Color Picker">
         <mdbutton class="actionBarButton" text="mdi-eyedropper-variant" variant="text" on:tap={startScreenPicker} />
     </CActionBar> -->
-    <gridlayout padding={16} row={1} rows="auto,*, auto, auto, auto, auto">
+    <gridlayout padding="16 {HORIZONTAL_PADDING} 16 {HORIZONTAL_PADDING}" row={1} rows="auto,*, auto, auto, auto, auto">
         <!-- <gridlayout backgroundColor={hsvaToHex()} borderRadius="18" height="90" /> -->
 
         <segmentedbar horizontalAlignment="center" marginBottom={16} selectedIndex={tabs.findIndex((t) => t.id === mode)} on:selectedIndexChanged={onSelectedIndexChanged}>
@@ -732,51 +752,63 @@
             {#if mode === 'hue'}
                 <gridlayout rows="*,auto,auto">
                     <canvasview bind:this={hvSquare} borderRadius={10} on:draw={drawSvSquare} on:touch={onSvSquareTouch} />
-                    <label class="header" row={1} text={lu('hue')} />
+                    <label {...headerProps} row={1} text={lu('hue')} />
                     <canvasview bind:this={hueBarCanvas} height={SLIDER_HEIGHT} row={2} on:draw={drawHueBar} on:touch={onHueBarTouch} />
                 </gridlayout>
             {/if}
             {#if mode === 'sliders'}
-                <stacklayout verticalAlignment="center">
-                    <label class="header" text={lu('red')} />
-                    <gridlayout columns="*,auto">
+                <stacklayout verticalAlignment="top">
+                    <label {...headerProps} text={lu('red')} />
+                    <gridlayout columns="*,auto" rows="auto">
                         <canvasview bind:this={redCanvas} height={SLIDER_HEIGHT} on:draw={(e) => drawRgbSlider(e, 'r')} on:touch={(e) => setRgb('r', e)} />
                         <textfield
                             col={1}
                             keyboardType="number"
                             marginLeft={10}
                             maxLength={3}
+                            padding="4"
                             text={channelValues.r.toString()}
+                            textAlignment="right"
                             variant="outline"
-                            width={70}
+                            verticalAlignment="center"
+                            verticalTextAlignment="middle"
+                            width={56}
                             on:textChange={(event) => onChannelTextChange('r', event)}
                         />
                     </gridlayout>
-                    <label class="header" text={lu('green')} />
-                    <gridlayout columns="*,auto">
+                    <label {...headerProps} text={lu('green')} />
+                    <gridlayout columns="*,auto" rows="auto">
                         <canvasview bind:this={greenCanvas} height={SLIDER_HEIGHT} on:draw={(e) => drawRgbSlider(e, 'g')} on:touch={(e) => setRgb('g', e)} />
                         <textfield
                             col={1}
                             keyboardType="number"
                             marginLeft={10}
                             maxLength={3}
+                            padding="4"
                             text={channelValues.g.toString()}
+                            textAlignment="right"
                             variant="outline"
-                            width={70}
+                            verticalAlignment="center"
+                            verticalTextAlignment="middle"
+                            width={56}
                             on:textChange={(event) => onChannelTextChange('g', event)}
                         />
                     </gridlayout>
-                    <label class="header" text={lu('blue')} />
-                    <gridlayout columns="*,auto">
+                    <label {...headerProps} text={lu('blue')} />
+                    <gridlayout columns="*,auto" rows="auto">
                         <canvasview bind:this={blueCanvas} height={SLIDER_HEIGHT} on:draw={(e) => drawRgbSlider(e, 'b')} on:touch={(e) => setRgb('b', e)} />
                         <textfield
                             col={1}
                             keyboardType="number"
                             marginLeft={10}
                             maxLength={3}
+                            padding="4"
                             text={channelValues.b.toString()}
+                            textAlignment="right"
                             variant="outline"
-                            width={70}
+                            verticalAlignment="center"
+                            verticalTextAlignment="middle"
+                            width={56}
                             on:textChange={(event) => onChannelTextChange('b', event)}
                         />
                     </gridlayout>
@@ -785,7 +817,7 @@
         </gridlayout>
 
         <stacklayout row={2} visibility={alphaSupport ? 'visible' : 'collapse'}>
-            <label class="header" text={lu('opacity')} />
+            <label {...headerProps} text={lu('opacity')} />
             <canvasview bind:this={alphaCanvas} height={SLIDER_HEIGHT} on:draw={drawAlphaSlider} on:touch={onAlphaTouch} />
         </stacklayout>
 
