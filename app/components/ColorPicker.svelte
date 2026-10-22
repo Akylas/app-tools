@@ -6,7 +6,7 @@
     import { lc, lu } from '@nativescript-community/l';
     import { Template } from '@nativescript-community/svelte-native/components';
     import { NativeViewElementNode } from '@nativescript-community/svelte-native/dom';
-    import { closeBottomSheet } from '@nativescript-community/ui-material-bottomsheet/svelte';
+    import { closeBottomSheet } from '@nativescript-community/ui-bottomsheet/svelte';
     import { onMount } from 'svelte';
     import { colors, screenWidthDips } from '~/variables';
     const SLIDER_HEIGHT = 32;
