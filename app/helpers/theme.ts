@@ -38,7 +38,7 @@ Application.on(Application.systemAppearanceChangedEvent, (event: SystemAppearanc
             // ignore theme change on background
             return;
         }
-        DEV_LOG && console.log('systemAppearanceChangedEvent', theme, event.newValue, autoDarkToBlack, new Error().stack);
+        DEV_LOG && console.log('systemAppearanceChangedEvent', theme, event.newValue, autoDarkToBlack);
         if (theme === 'auto') {
             event.cancel = true;
             let realTheme = event.newValue as Themes;
