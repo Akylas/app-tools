@@ -64,6 +64,8 @@ declare namespace svelteNative.JSX {
     interface ButtonAttributes {
         variant?: string;
         shape?: string;
+        role?: string;
+        busy?: boolean;
     }
 
     interface ImageAttributes {
@@ -256,6 +258,7 @@ declare namespace svelteNative.JSX {
     type IntrinsicElementsAugmented = TIntrinsicElements & {
         gesturerootview: GridLayoutAttributes;
         mdbutton: ButtonAttributes;
+        uibutton: ButtonAttributes;
         cspan: CSpanAttributes;
         canvaslabel: CanvasLabelAttributes;
         canvasview: CanvasAttributes;

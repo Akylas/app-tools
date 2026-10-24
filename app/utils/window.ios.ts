@@ -1,11 +1,13 @@
 import { Application, ApplicationSettings } from '@nativescript/core';
-import { WindowOptions, refreshRequestedEvent } from './window.common';
+import { WindowCommand, WindowOptions, refreshRequestedEvent, windowCommandEvent } from './window.common';
 
 export * from './window.common';
 
 // CGFLOAT_MAX
 const NO_MAX_SIDE = 10000000;
 const WINDOW_FRAME_KEY = 'window_frame';
+
+export const isCatalyst = NSProcessInfo.processInfo.macCatalystApp;
 
 let windowOptions: WindowOptions = {};
 
@@ -75,8 +77,24 @@ function observeWindowFrame(scene: UIWindowScene) {
 export function startWindowHelper(options: WindowOptions = {}) {
     windowOptions = options;
     Application.on(Application.displayedEvent, applyWindowSizeRestrictions);
-    if (options.refreshMenuTitle) {
+    if (isCatalyst && (options.refreshMenuTitle || options.commands?.length)) {
         UIMenuSystem.mainSystem.setNeedsRebuild();
+    }
+}
+
+function insertWindowCommand(builder: UIMenuBuilder, windowCommand: WindowCommand) {
+    const command = UIKeyCommand.commandWithTitleImageActionInputModifierFlagsPropertyList(windowCommand.title, null, 'requestWindowCommand', windowCommand.input, UIKeyModifierFlags.Command, windowCommand.id);
+    const menu = UIMenu.menuWithTitleImageIdentifierOptionsChildren('', null, 'window.' + windowCommand.id, UIMenuOptions.DisplayInline, [command]);
+    switch (windowCommand.menu) {
+        case 'preferences':
+            builder.replaceMenuForIdentifierWithMenu(UIMenuPreferences, menu);
+            break;
+        case 'view':
+            builder.insertChildMenuAtStartOfMenuForIdentifier(menu, UIMenuView);
+            break;
+        default:
+            // the system Find entries are disabled without a find interaction and hold the same shortcut
+            builder.replaceMenuForIdentifierWithMenu(UIMenuFind, menu);
     }
 }
 
@@ -84,16 +102,24 @@ export function startWindowHelper(options: WindowOptions = {}) {
 class CatalystAppDelegate extends UIResponder implements UIApplicationDelegate {
     public static ObjCProtocols = [UIApplicationDelegate];
     public static ObjCExposedMethods = {
-        requestRefresh: { returns: interop.types.void, params: [interop.types.id] }
+        requestRefresh: { returns: interop.types.void, params: [interop.types.id] },
+        requestWindowCommand: { returns: interop.types.void, params: [interop.types.id] }
     };
 
     buildMenuWithBuilder(builder: UIMenuBuilder) {
         super.buildMenuWithBuilder(builder);
-        if (builder.system !== UIMenuSystem.mainSystem || !windowOptions.refreshMenuTitle) {
+        if (builder.system !== UIMenuSystem.mainSystem) {
             return;
         }
-        const command = UIKeyCommand.commandWithTitleImageActionInputModifierFlagsPropertyList(windowOptions.refreshMenuTitle, null, 'requestRefresh', 'r', UIKeyModifierFlags.Command, null);
-        builder.insertChildMenuAtStartOfMenuForIdentifier(UIMenu.menuWithTitleImageIdentifierOptionsChildren('', null, 'refresh', UIMenuOptions.DisplayInline, [command]), UIMenuView);
+        if (windowOptions.refreshMenuTitle) {
+            const command = UIKeyCommand.commandWithTitleImageActionInputModifierFlagsPropertyList(windowOptions.refreshMenuTitle, null, 'requestRefresh', 'r', UIKeyModifierFlags.Command, null);
+            builder.insertChildMenuAtStartOfMenuForIdentifier(UIMenu.menuWithTitleImageIdentifierOptionsChildren('', null, 'refresh', UIMenuOptions.DisplayInline, [command]), UIMenuView);
+        }
+        windowOptions.commands?.forEach((windowCommand) => insertWindowCommand(builder, windowCommand));
+    }
+
+    requestWindowCommand(sender: UIKeyCommand) {
+        Application.notify({ eventName: windowCommandEvent, object: Application, commandId: sender.propertyList });
     }
 
     requestRefresh(sender) {
@@ -103,6 +129,6 @@ class CatalystAppDelegate extends UIResponder implements UIApplicationDelegate {
 
 // Plugins (universal-links, systemui) only create a delegate when none is set and then extend it,
 // so this module must be imported before them.
-if (NSProcessInfo.processInfo.macCatalystApp && !Application.ios.delegate) {
+if (isCatalyst && !Application.ios.delegate) {
     Application.ios.delegate = CatalystAppDelegate;
 }
