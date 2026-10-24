@@ -89,6 +89,10 @@ export interface Options {
     updateSystemFontScale?: (value) => void;
     onInitRootView?: (context, rootViewStyle: Style) => void;
     getTheme?: (colorTheme) => any;
+    /** the theme defines colorSurfaceContainerHigh(est) itself: they are not derived from colorSurfaceContainer */
+    keepSurfaceContainerHigh?: boolean;
+    /** iOS: tint the window (native controls: bars, buttons, switches) with `colorPrimary`. Off by default: UIKit keeps its own tint */
+    tintWindow?: boolean;
 }
 const options: Options = {
     getTheme: (colorTheme) => require(`~/themes/${colorTheme}.json`)
@@ -420,7 +424,9 @@ export function updateThemeColors(theme: string, colorTheme: ColorThemes = Appli
         currentColors.colorBackground = '#000000';
         currentColors.colorSurfaceContainer = '#000000';
     }
-    if (theme === 'dark') {
+    if (options.keepSurfaceContainerHigh) {
+        // defined by the theme
+    } else if (theme === 'dark') {
         currentColors.colorSurfaceContainerHigh = new Color(currentColors.colorSurfaceContainer).lighten(10).hex;
         currentColors.colorSurfaceContainerHighest = new Color(currentColors.colorSurfaceContainer).lighten(20).hex;
     } else {
@@ -433,6 +439,13 @@ export function updateThemeColors(theme: string, colorTheme: ColorThemes = Appli
     Object.keys(currentColors).forEach((c) => {
         rootViewStyle?.setUnscopedCssVariable('--' + c, currentColors[c]);
     });
+    if (__IOS__ && options.tintWindow) {
+        // one tint for the native controls (bars, buttons, switches)
+        const window = rootView?.nativeViewProtected?.window ?? Application.ios?.window;
+        if (window) {
+            window.tintColor = new Color(currentColors.colorPrimary).ios;
+        }
+    }
     colors.set(currentColors);
     Application.notify({ eventName: 'colorsChange', colors: currentColors });
     // DEV_LOG && console.log('changed colors', theme, rootView, [...rootView?.cssClasses], theme, JSON.stringify(currentColors));
