@@ -25,7 +25,11 @@ export function groupByArray<T>(items: T[], keyGetter: (item: T) => string[]) {
 }
 
 export function setCustomCssRootClass(className, oldClassName?) {
-    const rootView = Application.getRootView();
+    let rootView = Application.getRootView();
+    // the theme (css-theme) and system css classes live on the real root, the parent of the app root
+    if (rootView?.parent) {
+        rootView = rootView.parent as any;
+    }
     if (!rootView) {
         return;
     }
