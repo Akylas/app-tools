@@ -773,8 +773,7 @@
                             verticalAlignment="center"
                             verticalTextAlignment="middle"
                             width={56}
-                            on:textChange={(event) => onChannelTextChange('r', event)}
-                        />
+                            on:textChange={(event) => onChannelTextChange('r', event)} />
                     </gridlayout>
                     <label {...headerProps} text={lu('green')} />
                     <gridlayout columns="*,auto" rows="auto">
@@ -791,8 +790,7 @@
                             verticalAlignment="center"
                             verticalTextAlignment="middle"
                             width={56}
-                            on:textChange={(event) => onChannelTextChange('g', event)}
-                        />
+                            on:textChange={(event) => onChannelTextChange('g', event)} />
                     </gridlayout>
                     <label {...headerProps} text={lu('blue')} />
                     <gridlayout columns="*,auto" rows="auto">
@@ -809,8 +807,7 @@
                             verticalAlignment="center"
                             verticalTextAlignment="middle"
                             width={56}
-                            on:textChange={(event) => onChannelTextChange('b', event)}
-                        />
+                            on:textChange={(event) => onChannelTextChange('b', event)} />
                     </gridlayout>
                 </stacklayout>
             {/if}
@@ -832,8 +829,7 @@
                                 visibility={item[index] ? 'visible' : 'collapse'}
                                 width={SAVED_THUMB_RADIUS * 2}
                                 on:draw={(e) => drawSavedColor(e, item[index])}
-                                on:tap={(e) => onDrawSavedColorTapped(e, item[index])}
-                            />
+                                on:tap={(e) => onDrawSavedColorTapped(e, item[index])} />
                         {/each}
                     </wraplayout>
                 </Template>
