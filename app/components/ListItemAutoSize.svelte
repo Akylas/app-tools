@@ -123,6 +123,7 @@
         {fontWeight}
         html={item.html}
         paddingBottom={addedPadding}
+        paddingRight={chevron ? 24 : 0}
         paddingTop={addedPadding}
         {...extraPaddingLeft ? { paddingLeft: extraPaddingLeft } : {}}
         text={item.text}
