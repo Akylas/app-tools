@@ -1,7 +1,7 @@
 <script context="module" lang="ts">
     import { Canvas, CanvasView, Paint } from '@nativescript-community/ui-canvas';
     import { conditionalEvent, createEventDispatcher } from '@shared/utils/svelte/ui';
-    import { colors, fontScale } from '~/variables';
+    import { colors, fontScale, fonts } from '~/variables';
     import type { IListItem } from './ListItem';
     const linePaint = new Paint();
     linePaint.strokeWidth = 1;
@@ -25,6 +25,12 @@
     export let columns: string = '*,auto';
     export let mainCol = 0;
     export let extraPaddingLeft = 0;
+    /** Top and bottom padding of the text; `null` keeps the default one. */
+    export let verticalPadding: number = null;
+    /** Where the bottom line starts. */
+    export let lineInset = 20;
+    /** A trailing glyph, e.g. a chevron on a row that opens a page. */
+    export let chevron: string = null;
     /** Multiplies the title font size into its line height; `null` leaves the line height alone. */
     export let lineHeightFactor: number = 1.3;
     export let onLinkTap: (event) => void = null;
@@ -39,7 +45,7 @@
         const w = canvas.getWidth();
 
         if (item.showBottomLine || showBottomLine) {
-            event.canvas.drawLine(20, h - 1, w, h - 1, linePaint);
+            event.canvas.drawLine(lineInset, h - 1, w, h - 1, linePaint);
         }
         // if (leftIcon) {
         //     const fontSize = iconFontSize * $fontScale;
@@ -54,7 +60,7 @@
         (item.onDraw || onDraw)?.(item, event);
     }
 
-    $: addedPadding = (item.subtitle?.length > 0 ? 6 : 10) + (__ANDROID__ ? 8 : 12);
+    $: addedPadding = verticalPadding ?? (item.subtitle?.length > 0 ? 6 : 10) + (__ANDROID__ ? 8 : 12);
 </script>
 
 <!-- <gridlayout>
@@ -125,11 +131,15 @@
         disableCss={true}
         fontSize={(item.rightValueFontSize || subtitleFontSize) * $fontScale}
         marginLeft={16}
+        marginRight={chevron ? 22 : 0}
         {...extraPaddingLeft ? { paddingLeft: extraPaddingLeft } : {}}
         text={typeof item.rightValue === 'function' ? item.rightValue() : item.rightValue}
         textAlignment="right"
         verticalAlignment="middle"
         visibility={!!item.rightValue ? 'visible' : 'collapse'}
         on:tap={(event) => dispatch('rightIconTap', event)} />
+    {#if chevron}
+        <label col={mainCol + 1} color={colorOnSurfaceVariant} disableCss={true} fontFamily={$fonts.mdi} fontSize={20} horizontalAlignment="right" text={chevron} verticalAlignment="middle" />
+    {/if}
     <slot />
 </canvasview>
