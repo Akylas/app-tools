@@ -1,10 +1,13 @@
 <script context="module" lang="ts">
-    import { Canvas, CanvasView, Paint } from '@nativescript-community/ui-canvas';
+    import { Align, Canvas, CanvasView, Paint } from '@nativescript-community/ui-canvas';
     import { conditionalEvent, createEventDispatcher } from '@shared/utils/svelte/ui';
     import { colors, fontScale, fonts } from '~/variables';
     import type { IListItem } from './ListItem';
     const linePaint = new Paint();
     linePaint.strokeWidth = 1;
+    const chevronPaint = new Paint();
+    chevronPaint.setTextAlign(Align.RIGHT);
+    chevronPaint.textSize = 20;
 </script>
 
 <script lang="ts">
@@ -46,6 +49,12 @@
 
         if (item.showBottomLine || showBottomLine) {
             event.canvas.drawLine(lineInset, h - 1, w, h - 1, linePaint);
+        }
+        if (chevron) {
+            chevronPaint.fontFamily = $fonts.mdi;
+            chevronPaint.color = colorOnSurfaceVariant;
+            const { ascent, descent } = chevronPaint.getFontMetrics();
+            canvas.drawText(chevron, w - 16, h / 2 - (ascent + descent) / 2, chevronPaint);
         }
         // if (leftIcon) {
         //     const fontSize = iconFontSize * $fontScale;
@@ -138,8 +147,5 @@
         verticalAlignment="middle"
         visibility={!!item.rightValue ? 'visible' : 'collapse'}
         on:tap={(event) => dispatch('rightIconTap', event)} />
-    {#if chevron}
-        <label col={mainCol + 1} color={colorOnSurfaceVariant} disableCss={true} fontFamily={$fonts.mdi} fontSize={20} horizontalAlignment="right" text={chevron} verticalAlignment="middle" />
-    {/if}
     <slot />
 </canvasview>
