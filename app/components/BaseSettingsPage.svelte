@@ -12,6 +12,7 @@
     import IconButton from '@shared/components/IconButton.svelte';
     import ListItemAutoSize from '@shared/components/ListItemAutoSize.svelte';
     import { ALERT_OPTION_MAX_HEIGHT } from '@shared/constants';
+    import { updateRowPositions } from '@shared/utils/groupedRows';
     import { showError } from '@shared/utils/showError';
     import { createView, showAlertOptionSelect, showSliderPopover } from '@shared/utils/ui';
     import { onLanguageChanged } from '~/helpers/locale';
@@ -52,6 +53,14 @@
     export let collectionViewProps: any = {};
     /** Spread into every row, to restyle them from the app. */
     export let itemProps: any = {};
+    /** Gives each row its `position` in its section (first, middle, last, only), to draw the rows as grouped cards. */
+    export let groupRows = false;
+    /** Props spread last into each row, from the item (a grouped card's corners and margins...). */
+    export let getItemProps: (item: any) => any = null;
+    /** Props spread into the icon of a `leftIcon` row. */
+    export let getLeftIconProps: (item: any) => any = null;
+    /** Css class of the section header rows. */
+    export let sectionHeaderClass = 'sectionHeader';
     /** When set, the left icon is styled by this css class alone instead of the inline defaults. */
     export let leftIconClass: string = null;
     /** `backgroundColor` and `props` for the slider popovers, to restyle them. */
@@ -185,10 +194,17 @@
         return options || [];
     }
 
+    function isGroupedRow(item) {
+        return !!item && item.type !== 'header' && item.type !== 'sectionheader';
+    }
+
     function rebuildDisplayedItems() {
         const source = resolveSourceItems();
         const provider = searchItemsProvider || defaultSearchItemsProvider;
         const visibleItems = searchEnabled && searchFilter?.length > 1 ? provider(source, searchFilter) : source;
+        if (groupRows) {
+            updateRowPositions((index) => visibleItems[index], visibleItems.length, isGroupedRow);
+        }
         displayedItems = new ObservableArray(visibleItems);
     }
 
@@ -519,13 +535,14 @@
             {...collectionViewProps}
             {...$$restProps}>
             <Template key="sectionheader" let:item>
-                <label class="sectionHeader" {...item.additionalProps || {}} text={item.title} />
+                <label class={sectionHeaderClass} {...item.additionalProps || {}} text={item.title} />
             </Template>
 
             <Template key="switch" let:item>
                 <ListItemAutoSize
                     item={{ ...item, title: getTitle(item), subtitle: getDescription(item) }}
                     {...itemProps}
+                    {...getItemProps?.(item)}
                     on:longPress={(event) => onItemLongPress?.(item, event)}
                     on:tap={(event) => handleItemTap(item, event)}>
                     <switch id="checkbox" checked={item.value} col={1} marginLeft={10} verticalAlignment="center" on:checkedChange={(e) => handleOnCheckBox(item, e)} />
@@ -536,6 +553,7 @@
                 <ListItemAutoSize
                     item={{ ...item, title: getTitle(item), subtitle: getDescription(item) }}
                     {...itemProps}
+                    {...getItemProps?.(item)}
                     on:longPress={(event) => onItemLongPress?.(item, event)}
                     on:tap={(event) => handleItemTap(item, event)}>
                     <checkbox id="checkbox" checked={item.value} col={1} on:checkedChange={(e) => handleOnCheckBox(item, e)} />
@@ -547,6 +565,7 @@
                     item={{ ...item, title: getTitle(item), subtitle: getDescription(item) }}
                     {...itemProps}
                     showBottomLine={false}
+                    {...getItemProps?.(item)}
                     on:longPress={(event) => onItemLongPress?.(item, event)}
                     on:tap={(event) => handleItemTap(item, event)}>
                     <IconButton col={1} text={item.rightBtnIcon} on:tap={(event) => handleRightIconTap(item, event)} />
@@ -560,12 +579,13 @@
                     {...itemProps}
                     mainCol={1}
                     showBottomLine={false}
+                    {...getItemProps?.(item)}
                     on:longPress={(event) => onItemLongPress?.(item, event)}
                     on:tap={(event) => handleItemTap(item, event)}>
                     {#if leftIconClass}
-                        <label class={leftIconClass} col={0} text={item.icon} />
+                        <label class={leftIconClass} col={0} text={item.icon} {...getLeftIconProps?.(item)} />
                     {:else}
-                        <label col={0} color={colorOnBackground} fontFamily={$fonts.mdi} fontSize={24} padding="0 10 0 0" text={item.icon} verticalAlignment="center" />
+                        <label col={0} color={colorOnBackground} fontFamily={$fonts.mdi} fontSize={24} padding="0 10 0 0" text={item.icon} verticalAlignment="center" {...getLeftIconProps?.(item)} />
                     {/if}
                 </ListItemAutoSize>
             </Template>
@@ -575,6 +595,7 @@
                     item={{ ...item, title: getTitle(item), subtitle: getDescription(item) }}
                     {...itemProps}
                     showBottomLine={false}
+                    {...getItemProps?.(item)}
                     on:longPress={(event) => onItemLongPress?.(item, event)}
                     on:tap={(event) => handleItemTap(item, event)} />
             </Template>
