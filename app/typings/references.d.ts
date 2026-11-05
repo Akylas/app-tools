@@ -28,5 +28,7 @@ declare const SPONSOR_URL: string;
 
 declare const SUPPORTED_LOCALES: string[];
 declare const SUPPORTED_COLOR_THEMES: string[];
+/** optional: the color theme used until the user picks one */
+declare const APP_DEFAULT_COLOR_THEME: string | undefined;
 declare const FALLBACK_LOCALE: string;
 declare const DEFAULT_THEME: string;
