@@ -6,11 +6,12 @@
     import { CollectionView } from '@nativescript-community/ui-collectionview';
     import { Label } from '@nativescript-community/ui-label';
     import { prompt } from '@nativescript-community/ui-dialogs';
-    import { ApplicationSettings, ObservableArray, Page, Utils, View } from '@nativescript/core';
+    import { ApplicationSettings, ObservableArray, Utils, View } from '@nativescript/core';
     import ActionBarSearch from '@shared/components/ActionBarSearch.svelte';
     import CActionBar from '@shared/components/CActionBar.svelte';
     import IconButton from '@shared/components/IconButton.svelte';
     import ListItemAutoSize from '@shared/components/ListItemAutoSize.svelte';
+    import PlainPage from '@shared/components/PlainPage.svelte';
     import { ALERT_OPTION_MAX_HEIGHT } from '@shared/constants';
     import { updateRowPositions } from '@shared/utils/groupedRows';
     import { showError } from '@shared/utils/showError';
@@ -32,7 +33,6 @@
     let { colorOnBackground, colorOnSurfaceVariant } = $colors;
     $: ({ colorOnBackground, colorOnSurfaceVariant } = $colors);
 
-    let page: NativeViewElementNode<Page>;
     let collectionView: NativeViewElementNode<CollectionView>;
     let search;
     let checkboxTapTimer;
@@ -40,6 +40,8 @@
     let displayedItems = new ObservableArray<any>([]);
 
     export let id = 'settingsPage';
+    /** The page element, wrapping the content in its default slot. With a `appBar` slot, the app also takes the bar over (the default bar and its search are not created). */
+    export let pageComponent: typeof PlainPage = PlainPage;
     export let title: string = null;
     export let showSearch = false;
     export let searchEnabled = false;
@@ -522,10 +524,12 @@
     onLanguageChanged(() => refresh());
 </script>
 
-<page bind:this={page} {id} actionBarHidden={true}>
+<svelte:component this={pageComponent} {id}>
+    <slot name="appBar" />
     <!-- the insets come from the store rather than the `pageContent` css variables, which not every app defines -->
     <gridlayout class="pageContent" paddingLeft={$windowInset.left} paddingRight={$windowInset.right} rows="auto,*">
         <collectionview
+            id="settingsCollectionView"
             bind:this={collectionView}
             accessibilityValue="settingsCV"
             itemTemplateSelector={templateSelector}
@@ -603,12 +607,14 @@
             <slot />
         </collectionview>
 
-        <CActionBar canGoBack modalWindow={showSearch} onGoBack={showSearch ? () => hideSearchBar() : null} {title}>
-            <slot name="actionBarButtons" />
-            {#if searchEnabled}
-                <mdbutton class="actionBarButton" text="mdi-magnify" variant="text" on:tap={() => showSearchBar()} />
-            {/if}
-            <ActionBarSearch bind:this={search} slot="center" {refresh} bind:visible={showSearch} />
-        </CActionBar>
+        {#if !$$slots.appBar}
+            <CActionBar canGoBack modalWindow={showSearch} onGoBack={showSearch ? () => hideSearchBar() : null} {title}>
+                <slot name="actionBarButtons" />
+                {#if searchEnabled}
+                    <mdbutton class="actionBarButton" text="mdi-magnify" variant="text" on:tap={() => showSearchBar()} />
+                {/if}
+                <ActionBarSearch bind:this={search} slot="center" {refresh} bind:visible={showSearch} />
+            </CActionBar>
+        {/if}
     </gridlayout>
-</page>
+</svelte:component>
