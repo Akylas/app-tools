@@ -33,7 +33,9 @@ Use what these return, not what you expect. Concretely:
 - **Use the type histogram as the allowed vocabulary.** Many repos lean heavily on `chore` even though
   the commitlint default set omits it. If the histogram says `chore` dominates, `chore` is correct here.
 - **Use the scope histogram.** Do not invent scopes, and do not carry scopes over from another project.
-  Note the *shape* too — some repos use `fix(android):`, others `fix(android/camera):`. Match what exists.
+  Note the *shape* too — some repos use `fix(android):`, others `fix(android/camera):`. Match what exists,
+  except a platform scope that release notes filter on (see "The type and scope can end up in
+  user-facing release notes" below), which must be exactly the platform name.
 - **If no commitlint config and no lint/test CI exist, nothing validates your message.** Say so rather
   than implying a safety net that is not there — and be correspondingly careful.
 
@@ -111,6 +113,19 @@ The **header** is mandatory; **scope**, **body**, and **footer** are optional.
 - `<scope>` (optional) — from the repo's scope histogram, or the directory/feature the change lives in. Match the existing shape.
 - `<subject>`: imperative present tense ("change" not "changed"), lowercase first letter, no trailing period
 - **No line may exceed 100 characters**
+
+**The type and scope can end up in user-facing release notes.** Check whether the repo builds them
+from commits (`grep -n "conventional_changelog\|analyze_commits" fastlane/Fastfile`, a release
+workflow, a semantic-release / release-it config). If it does, read which types it lists and how it
+filters scopes, then write for it. With the shared fastlane template:
+
+- only `feat`, `fix` and `perf` subjects are listed, each as its subject line, so the subject must
+  read as a user-facing change. Use `fix` ONLY for a bug a user of a released build could hit; a fix
+  to internal code, tooling, CI, tests, docs or unreleased work is `chore`, `refactor`, `ci`, `test`
+  or `docs`, never `fix`
+- the other platform's commits are dropped by **exact** scope match (`ios` / `android`), so a
+  platform-specific change needs exactly that scope (`fix(android): …`, or `fix(android,widgets): …`).
+  `android/camera` never matches, and an unscoped commit shows in both platforms' notes
 
 **Examples** (shape, not vocabulary — take vocabulary from the repo):
 

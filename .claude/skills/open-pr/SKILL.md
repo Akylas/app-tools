@@ -41,7 +41,7 @@ catch anything, and weight the manual scenarios accordingly.
         EOF
         )"
         ```
-    3. Title follows the same Conventional Commits format as the commits — derive type/scope vocabulary from the repo (see the `commit` skill).
+    3. Title follows the same Conventional Commits format as the commits — derive type/scope vocabulary from the repo (see the `commit` skill). The squash-merge uses this title as the release notes entry, so the commit skill's release-notes rules (`fix` only for user-visible bugs, exact `ios`/`android` scope) apply to it.
 4. **ALWAYS** report the PR URL back to the user.
 
 ## Writing the description
