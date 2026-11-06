@@ -297,7 +297,8 @@
                         title: getTitle(item),
                         messageView: createView(Label, {
                             padding: '0 20 0 20',
-                            autoFontSize: true,
+                            // on iOS the label grows to fill the dialog
+                            ...(__ANDROID__ ? { autoFontSize: true } : { fontSize: 14 }),
                             textWrap: true,
                             lineBreak: 'end',
                             maxLines: 3,
