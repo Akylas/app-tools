@@ -21,7 +21,8 @@ export function updateRowPositions<T extends PositionedItem>(getItem: (index: nu
         if (!group) {
             continue;
         }
-        const first = getGroup(getItem(index - 1)) !== group;
+        // no getItem(-1): some arrays (an ObservableArray) read it as the last item
+        const first = (index === 0 ? undefined : getGroup(getItem(index - 1))) !== group;
         const last = getGroup(getItem(index + 1)) !== group;
         const position = getRowPosition(first, last);
         if (item.position !== position) {
