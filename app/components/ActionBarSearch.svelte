@@ -15,6 +15,12 @@
     let searchTF: NativeViewElementNode<TextField>;
     let filter: string = null;
     export let visible = false;
+    /** debounce, in ms, before `refresh` is called while typing */
+    export let delay = 500;
+    /** minimum number of characters to start searching */
+    export let minLength = 2;
+    /** when false the field stays visible after the clear button is tapped (page level search field) */
+    export let hideOnClear = true;
 
     export function showSearch() {
         visible = true;
@@ -64,11 +70,11 @@
                     clearTimeout(searchAsTypeTimer);
                     searchAsTypeTimer = null;
                 }
-                if (query && query.length > 1) {
+                if (query.length >= minLength) {
                     searchAsTypeTimer = setTimeout(() => {
                         searchAsTypeTimer = null;
                         refresh(false, query);
-                    }, 500);
+                    }, delay);
                 } else {
                     // the timeout is to allow svelte to see changes with $:
                     setTimeout(() => {
@@ -100,7 +106,7 @@
         on:returnPress={blurTextField}
         on:textChange={(e) => onTextChanged(e['value'])}
     />
-    <!-- <mdbutton
+    <mdbutton
         class="actionBarButton"
         height={40}
         horizontalAlignment="right"
@@ -109,5 +115,5 @@
         variant="text"
         visibility={filter?.length > 0 ? 'visible' : 'hidden'}
         width={40}
-        on:tap={() => clearSearch()} /> -->
+        on:tap={() => clearSearch(true, hideOnClear)} />
 </gridlayout>
