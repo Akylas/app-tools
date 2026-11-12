@@ -61,6 +61,13 @@
             refresh(false, undefined);
         }
     }
+    // android: a padding set on the view resets the left one of the outline box, so only the end of the edit text is padded
+    function padClearButton() {
+        const editText = searchTF?.nativeView?.android?.getEditText();
+        if (editText) {
+            editText.setPadding(editText.getPaddingLeft(), editText.getPaddingTop(), Utils.layout.toDevicePixels(45), editText.getPaddingBottom());
+        }
+    }
     function onTextChanged(text: string) {
         const query = text.toLowerCase();
         // DEV_LOG && console.log('onTextChanged', query, filter);
@@ -99,10 +106,11 @@
         bind:this={searchTF}
         autocapitalizationType="none"
         hint={lc('search')}
-        paddingRight={45}
+        ios:paddingRight={45}
         placeholder={lc('search')}
         returnKeyType="search"
         variant="outline"
+        on:loaded={padClearButton}
         on:returnPress={blurTextField}
         on:textChange={(e) => onTextChanged(e['value'])}
     />
