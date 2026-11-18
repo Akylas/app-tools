@@ -59,8 +59,9 @@ export const actionBarHeight = writable(0);
 let startOrientation;
 
 let startingInLandscape;
-export let screenHeightDips = startingInLandscape ? Screen.mainScreen.widthDIPs : Screen.mainScreen.heightDIPs;
-export let screenWidthDips = startingInLandscape ? Screen.mainScreen.heightDIPs : Screen.mainScreen.widthDIPs;
+// portrait values (width is the short side) whatever the orientation at launch: the screen reports its own orientation, which can be wrong this early
+export let screenHeightDips = Math.max(Screen.mainScreen.widthDIPs, Screen.mainScreen.heightDIPs);
+export let screenWidthDips = Math.min(Screen.mainScreen.widthDIPs, Screen.mainScreen.heightDIPs);
 export let screenRatio = screenWidthDips / screenHeightDips;
 export const windowSize = writable({ width: screenWidthDips, height: screenHeightDips });
 
@@ -69,8 +70,8 @@ function updateStartOrientation() {
     startingInLandscape = startOrientation === 'landscape';
     orientation.set(startOrientation);
     isLandscape.set(startingInLandscape);
-    screenHeightDips = startingInLandscape ? Screen.mainScreen.widthDIPs : Screen.mainScreen.heightDIPs;
-    screenWidthDips = startingInLandscape ? Screen.mainScreen.heightDIPs : Screen.mainScreen.widthDIPs;
+    screenHeightDips = Math.max(Screen.mainScreen.widthDIPs, Screen.mainScreen.heightDIPs);
+    screenWidthDips = Math.min(Screen.mainScreen.widthDIPs, Screen.mainScreen.heightDIPs);
     screenRatio = screenWidthDips / screenHeightDips;
 }
 Application.on(Application.launchEvent, updateStartOrientation);
@@ -123,15 +124,31 @@ function updateIOSWindowInset() {
             const safeAreaInsets = Application.ios.window?.safeAreaInsets;
             // DEV_LOG && console.log('safeAreaInsets', safeAreaInsets?.top, safeAreaInsets?.right, safeAreaInsets?.bottom, safeAreaInsets?.left);
             if (safeAreaInsets) {
+                // UIKit already insets the pages by the left / right safe area: the css padding of the pages would double it
                 setWindowInset({
-                    left: Math.round(safeAreaInsets.left),
+                    left: 0,
                     top: 0,
-                    right: Math.round(safeAreaInsets.right),
+                    right: 0,
                     bottom: 0
                 });
             }
         }, 0);
     }
+}
+
+// the NativeWindow caches the orientation and drops the first change when the app started in landscape: read the window
+function updateIOSOrientationFromWindow() {
+    const bounds = Application.ios.window?.bounds;
+    if (!bounds) {
+        return;
+    }
+    const newOrientation = bounds.size.width > bounds.size.height ? 'landscape' : 'portrait';
+    if (get(orientation) === newOrientation) {
+        return;
+    }
+    orientation.set(newOrientation);
+    isLandscape.set(newOrientation === 'landscape');
+    updateIOSWindowInset();
 }
 
 function updateIOSWindowSize() {
@@ -233,24 +250,27 @@ if (__ANDROID__) {
         AppUtilsAndroid.prepareWindow(event.object['_dialogFragment'].getDialog().getWindow());
     });
 } else {
+    function updateOrientationDegrees() {
+        switch (UIDevice.currentDevice.orientation) {
+            case UIDeviceOrientation.PortraitUpsideDown:
+                orientationDegrees.set(180);
+                break;
+            case UIDeviceOrientation.LandscapeLeft:
+                orientationDegrees.set(270);
+                break;
+            case UIDeviceOrientation.LandscapeRight:
+                orientationDegrees.set(90);
+                break;
+            case UIDeviceOrientation.Portrait:
+                orientationDegrees.set(0);
+                break;
+        }
+    }
+
     @NativeClass
     class OrientationNotificationObserver extends NSObject {
         public handleDeviceOrientationChange(): void {
-            const orientation = UIDevice.currentDevice.orientation;
-            switch (orientation) {
-                case UIDeviceOrientation.PortraitUpsideDown:
-                    orientationDegrees.set(180);
-                    break;
-                case UIDeviceOrientation.LandscapeLeft:
-                    orientationDegrees.set(270);
-                    break;
-                case UIDeviceOrientation.LandscapeRight:
-                    orientationDegrees.set(90);
-                    break;
-                case UIDeviceOrientation.Portrait:
-                    orientationDegrees.set(0);
-                    break;
-            }
+            updateOrientationDegrees();
         }
 
         public static ObjCExposedMethods = {
@@ -259,11 +279,27 @@ if (__ANDROID__) {
     }
     const orientationObserver = OrientationNotificationObserver.new();
 
+    @NativeClass
+    class InterfaceOrientationObserver extends NSObject {
+        public handleInterfaceOrientationChange(): void {
+            updateIOSOrientationFromWindow();
+        }
+
+        public static ObjCExposedMethods = {
+            handleInterfaceOrientationChange: { returns: interop.types.void, params: [] }
+        };
+    }
+    // kept in a const: the notification center does not retain its observers
+    const interfaceOrientationObserver = InterfaceOrientationObserver.new();
+    NSNotificationCenter.defaultCenter.addObserverSelectorNameObject(interfaceOrientationObserver, 'handleInterfaceOrientationChange', UIApplicationDidChangeStatusBarOrientationNotification, null);
+
     shouldListenForSensorOrientation.subscribe((enabled) => {
         if (enabled) {
             NSNotificationCenter.defaultCenter.addObserverSelectorNameObject(orientationObserver, 'handleDeviceOrientationChange', UIDeviceOrientationDidChangeNotification, null);
 
             UIDevice.currentDevice.beginGeneratingDeviceOrientationNotifications();
+            // notifications only report changes
+            updateOrientationDegrees();
         } else {
             UIDevice.currentDevice.endGeneratingDeviceOrientationNotifications();
             NSNotificationCenter.defaultCenter.removeObserverNameObject(orientationObserver, 'handleDeviceOrientationChange', UIDeviceOrientationDidChangeNotification);
@@ -337,14 +373,17 @@ export const onInitRootView = function (force = false) {
         updateSystemFontScale(getCurrentFontScale());
         actionBarHeight.set(parseFloat(rootViewStyle.getCssVariable('--actionBarHeight')));
         actionBarButtonHeight.set(parseFloat(rootViewStyle.getCssVariable('--actionBarButtonHeight')));
+        updateIOSOrientationFromWindow();
         updateIOSWindowInset();
-        if (isMacCatalyst) {
-            // the window is resizable
-            rootView.on('layoutChanged', () => {
+        // a rotation lays the root view out again, whatever the orientation events say
+        rootView.on('layoutChanged', () => {
+            if (isMacCatalyst) {
+                // the window is resizable
                 updateIOSWindowSize();
                 updateIOSWindowInset();
-            });
-        }
+            }
+            updateIOSOrientationFromWindow();
+        });
     }
     Application.on(Application.fontScaleChangedEvent, (event) => updateSystemFontScale(event.newValue));
     DEV_LOG && console.log('on init', theme, getRealTheme(theme));
