@@ -429,7 +429,7 @@ export function updateThemeColors(theme: string, colorTheme: ColorThemes = Appli
     // DEV_LOG && console.log('updateThemeColors', theme, colorTheme, rootView);
     const rootViewStyle = rootView?.style;
     // no root view yet at launch on iOS: the colors still have to be computed, the css variables follow once it exists
-    if (!theme) {
+    if (!theme || (__ANDROID__ && !rootViewStyle)) {
         return;
     }
     // rootViewStyle?.setUnscopedCssVariable('--fontScale', fontScale + '');
