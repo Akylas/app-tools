@@ -381,11 +381,9 @@ export function start(force = false) {
             }
         });
     } else {
-        // without rootController systemAppearance will be null
-        if (Application.ios?.rootController) {
-            onReady();
-        } else {
-            Application.once(Application.initRootViewEvent, onReady);
-        }
+        // the colors must exist before the first view is created, which happens before the root view and the root controller do
+        onReady();
+        // applies the css variables once the root view exists
+        Application.once(Application.initRootViewEvent, onReady);
     }
 }
