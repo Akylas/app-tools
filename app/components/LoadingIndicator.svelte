@@ -12,7 +12,7 @@
 </script>
 
 <template>
-    <gesturerootview columns="auto,*" padding={20} rows="auto,auto,auto" width="80%">
+    <gesturerootview columns="auto,*" padding={20} rows="auto,auto,auto">
         <label colSpan={2} fontSize={20 * $fontScale} fontWeight="bold" padding={10} text={title} textWrap={true} verticalAlignment="middle" visibility={title ? 'visible' : 'collapse'} />
         <activityindicator busy={true} row={1} visibility={progress === null ? 'visible' : 'collapse'} />
         <label col={1} fontSize={16 * $fontScale} padding={10} row={1} {text} textWrap={true} verticalAlignment="middle" />

@@ -8,6 +8,7 @@ import { showPopover } from '@nativescript-community/ui-popover/svelte';
 import { type GridLayout, Utils, type View, type ViewBase } from '@nativescript/core';
 import { AlertOptions } from '@nativescript/core/ui/dialogs/dialogs-common';
 import { debounce } from '@nativescript/core/utils';
+import { flush } from 'svelte/internal';
 import type LoadingIndicator__SvelteComponent_ from '@shared/components/LoadingIndicator.svelte';
 import LoadingIndicator from '@shared/components/LoadingIndicator.svelte';
 import type OptionSelect__SvelteComponent_ from '@shared/components/OptionSelect.svelte';
@@ -127,6 +128,8 @@ export async function showLoading(msg?: string | ShowLoadingOptions) {
             props.progress = null;
         }
         indicator.instance.$set(props);
+        // $set is async: apply it now, the dialog is shown with the right content
+        flush();
         if (showLoadingStartTime === null) {
             showLoadingStartTime = Date.now();
             indicator.show();

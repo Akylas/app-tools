@@ -19,6 +19,7 @@ type HighlightEventData = import('@nativescript-community/ui-chart/charts/Chart'
 
 declare module 'svelte/internal' {
     export function get_current_component();
+    export function flush(): void;
 }
 type MultiPlatform<T> = T & {
     [K in keyof T as `ios:${K}`]: T[K];
