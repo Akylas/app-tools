@@ -203,11 +203,12 @@ export function applyTheme(theme: Themes) {
 }
 
 function getSystemAppearance() {
-    if (typeof Application.systemAppearance === 'function') {
-        return Application.systemAppearance();
+    const appearance = typeof Application.systemAppearance === 'function' ? Application.systemAppearance() : Application.systemAppearance;
+    if (appearance || !__IOS__) {
+        return appearance;
     }
-
-    return Application.systemAppearance;
+    // null on iOS until the window has a root view controller, which is after the launch event
+    return UIScreen.mainScreen.traitCollection.userInterfaceStyle === UIUserInterfaceStyle.Dark ? 'dark' : 'light';
 }
 
 export function getRealTheme(th = theme) {
