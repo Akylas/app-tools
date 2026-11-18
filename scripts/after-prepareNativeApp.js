@@ -1,10 +1,10 @@
-var path = require('path');
-var fs = require('fs');
+const path = require('path');
+const fs = require('fs');
 const { mergePropertiesFiles, savePropertiesFile } = require('merge-properties-files');
 
 module.exports = function ($logger, projectData, injector, hookArgs) {
     return new Promise(function (resolve, reject) {
-        var platformName = (
+        const platformName = (
             (hookArgs && hookArgs.platformData && hookArgs.platformData.normalizedPlatformName) ||
             (hookArgs.checkForChangesOpts && hookArgs.checkForChangesOpts.platform) ||
             ''
