@@ -176,7 +176,9 @@ function getRootViewStyle() {
 Application.on(Application.orientationChangedEvent, (event: OrientationChangedEventData) => {
     const newOrientation = event.newValue;
     orientation.set(newOrientation);
-    orientationDegrees.set(event.degrees ?? 0);
+    if (!(__ANDROID__ && get(shouldListenForSensorOrientation))) {
+        orientationDegrees.set(event.degrees ?? 0);
+    }
     isLandscape.set(newOrientation === 'landscape');
     if (__ANDROID__) {
         const rootViewStyle = getRootViewStyle();
