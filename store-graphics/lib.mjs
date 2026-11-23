@@ -11,12 +11,15 @@ export const STORE = resolve(REPO, process.argv.includes('--dir') ? process.argv
 export const BASE_LOCALE = 'en-US';
 export const bin = (name) => join(TOOL_DIR, 'node_modules', '.bin', name);
 
-/** store slots and the osg device frame of each target. aspect = width / height of the frame. */
+/**
+ * The store slots. `format` = the osg conversion id (render --formats), `deviceSet` = the osg device set of the screenshots
+ * of that device (null for the iPhone: it is the artboard itself), `size` = what osg renders, `raw` = captures folder.
+ */
 export const TARGETS = {
-    'ios-phone': { size: [1320, 2868], device: 'iphone-17-pro-max', aspect: 440 / 956, tablet: false, folder: 'ios/screenshots/{locale}', name: '{nn}_APP_IPHONE_69_{id}.jpg' },
-    'ios-tablet': { size: [2064, 2752], device: 'ipad-pro-13', aspect: 2064 / 2752, tablet: true, folder: 'ios/screenshots/{locale}', name: '{nn}_APP_IPAD_PRO_3GEN_129_{id}.jpg' },
-    'android-phone': { size: [1440, 2560], device: 'pixel-10-pro', aspect: 0.455, tablet: false, folder: 'android/{locale}/images/phoneScreenshots', name: '{n}_{locale}.jpg' },
-    'android-tablet': { size: [1600, 2560], device: 'tablet-10', aspect: 0.625, tablet: true, folder: 'android/{locale}/images/tenInchScreenshots', name: '{n}_{locale}.jpg' }
+    'ios-phone': { format: 'ios-6-9', deviceSet: null, size: [1290, 2796], folder: 'ios/screenshots/{locale}', name: '{nn}_APP_IPHONE_69_{id}.jpg' },
+    'ios-tablet': { format: 'ipad-13', deviceSet: 'ipad-pro-13', size: [2064, 2752], folder: 'ios/screenshots/{locale}', name: '{nn}_APP_IPAD_PRO_3GEN_129_{id}.jpg' },
+    'android-phone': { format: 'play-phone', deviceSet: 'android', size: [1080, 1920], folder: 'android/{locale}/images/phoneScreenshots', name: '{n}_{locale}.jpg' },
+    'android-tablet': { format: 'tablet-10', deviceSet: 'tablet-10', size: [1440, 2560], folder: 'android/{locale}/images/tenInchScreenshots', name: '{n}_{locale}.jpg' }
 };
 
 export const readJson = (path) => JSON.parse(readFileSync(path, 'utf8'));
