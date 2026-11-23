@@ -9,7 +9,7 @@ import { mkdirSync, mkdtempSync, readdirSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import sharp from 'sharp';
-import { buildProject } from './build-project.mjs';
+import { buildApp } from './build-project.mjs';
 import { STORE, bin, parseArgs } from './lib.mjs';
 
 const args = parseArgs(process.argv.slice(2));
@@ -21,7 +21,7 @@ mkdirSync(cache, { recursive: true });
 const cells = [];
 for (const entry of fonts) {
     const [font, titleWeight] = entry.split(':');
-    const project = await buildProject(app, target, { withShots: true, font, titleWeight });
+    const { project } = await buildApp(app, { withShots: true, font, titleWeight });
     project.projectData = project.projectData.filter((board) => ['cards'].includes(board.name));
     const path = join(cache, 'font-preview.json');
     writeFileSync(path, JSON.stringify(project));
