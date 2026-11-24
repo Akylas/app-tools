@@ -33,7 +33,7 @@ jobs:
     release:
         permissions:
             contents: write
-        runs-on: macos-15
+        runs-on: xcode-27
         steps:
             - name: Checkout repository
               uses: actions/checkout@v4
@@ -44,7 +44,7 @@ jobs:
 
             - uses: maxim-lobanov/setup-xcode@7f352e61cbe8130c957c3bc898c4fb025784ea1e
               with:
-                  xcode-version: 26.3
+                  xcode-version: 27.1
 
             - uses: oleksiyrudenko/gha-git-credentials@v2-latest
               with:
