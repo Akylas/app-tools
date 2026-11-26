@@ -176,7 +176,9 @@ function getRootViewStyle() {
 Application.on(Application.orientationChangedEvent, (event: OrientationChangedEventData) => {
     const newOrientation = event.newValue;
     orientation.set(newOrientation);
-    orientationDegrees.set(event.degrees ?? 0);
+    if (!(__ANDROID__ && get(shouldListenForSensorOrientation))) {
+        orientationDegrees.set(event.degrees ?? 0);
+    }
     isLandscape.set(newOrientation === 'landscape');
     if (__ANDROID__) {
         const rootViewStyle = getRootViewStyle();
@@ -428,7 +430,8 @@ export function updateThemeColors(theme: string, colorTheme: ColorThemes = Appli
     }
     // DEV_LOG && console.log('updateThemeColors', theme, colorTheme, rootView);
     const rootViewStyle = rootView?.style;
-    if (!rootViewStyle || !theme) {
+    // no root view yet at launch on iOS: the colors still have to be computed, the css variables follow once it exists
+    if (!theme || (__ANDROID__ && !rootViewStyle)) {
         return;
     }
     // rootViewStyle?.setUnscopedCssVariable('--fontScale', fontScale + '');

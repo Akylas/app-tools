@@ -203,11 +203,12 @@ export function applyTheme(theme: Themes) {
 }
 
 function getSystemAppearance() {
-    if (typeof Application.systemAppearance === 'function') {
-        return Application.systemAppearance();
+    const appearance = typeof Application.systemAppearance === 'function' ? Application.systemAppearance() : Application.systemAppearance;
+    if (appearance || !__IOS__) {
+        return appearance;
     }
-
-    return Application.systemAppearance;
+    // null on iOS until the window has a root view controller, which is after the launch event
+    return UIScreen.mainScreen.traitCollection.userInterfaceStyle === UIUserInterfaceStyle.Dark ? 'dark' : 'light';
 }
 
 export function getRealTheme(th = theme) {
@@ -381,11 +382,9 @@ export function start(force = false) {
             }
         });
     } else {
-        // without rootController systemAppearance will be null
-        if (Application.ios?.rootController) {
-            onReady();
-        } else {
-            Application.once(Application.initRootViewEvent, onReady);
-        }
+        // the colors must exist before the first view is created, which happens before the root view and the root controller do
+        onReady();
+        // applies the css variables once the root view exists
+        Application.once(Application.initRootViewEvent, onReady);
     }
 }

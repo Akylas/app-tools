@@ -1,0 +1,13 @@
+{
+    "name": "@akylas/store-graphics",
+    "private": true,
+    "type": "module",
+    "description": "Store screenshots and feature graphics for NativeScript apps: maestro captures, Open Screenshot Generator renders",
+    "engines": {
+        "node": ">=20.12"
+    },
+    "dependencies": {
+        "open-screenshot-generator": "1.0.11",
+        "sharp": "^0.34.0"
+    }
+}

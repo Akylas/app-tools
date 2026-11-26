@@ -158,7 +158,7 @@ export function closeModal(result?: any, parent?: View) {
 
 export function showModal<T, U>(modalOptions: ShowModalOptions<U>): Promise<T> {
     if (modalOptions.fullscreen) {
-        const modalLauncher = resolveTarget(modalOptions.target) || Frame.topmost().currentPage || Application.getRootView();
+        const modalLauncher = resolveTarget(modalOptions.target) || Frame.topmost()?.currentPage || Application.getRootView();
         hiddenPageByModal = modalLauncher instanceof Page ? modalLauncher : modalLauncher.page;
         hiddenPageByModal?.notify(createNavigatedData(hiddenPageByModal, PageBase.navigatingFromEvent));
         setTimeout(() => {
