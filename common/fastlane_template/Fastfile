@@ -524,6 +524,7 @@ platform :ios do
       if (ENV["GITHUB_ACTIONS"] == 'true')
       #    # automatic code signing
         update_code_signing_settings(
+          team_id: ENV["APPLE_TEAM_ID"],
           use_automatic_signing: false,
           bundle_identifier: app_identifier,
           code_sign_identity: "iPhone Distribution",
@@ -642,6 +643,7 @@ platform :mac do
       if build_pkg
         prepare(platform:'catalyst', options: options)
         update_code_signing_settings(
+          team_id: ENV["APPLE_TEAM_ID"],
           use_automatic_signing: false,
           sdk: "macosx*",
           code_sign_identity: "Apple Distribution",
@@ -669,6 +671,7 @@ platform :mac do
         # the Github build must not be a store build (no in-app purchase), so it is prepared and archived again
         prepare(platform:'catalyst', github: true, options: options)
         update_code_signing_settings(
+          team_id: ENV["APPLE_TEAM_ID"],
           use_automatic_signing: false,
           sdk: "macosx*",
           code_sign_identity: "Developer ID Application",
